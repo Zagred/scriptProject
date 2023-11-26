@@ -12,89 +12,88 @@ namespace ScriptProject
     {
         static void Main(string[] args)
         {
-            
-           //list ot listove s vseki folder i ptahofe v nego, taka shte vurti vseki folder po otdelno i shte resetvame dictonaryto da nyama poftorenie
+               
             List<string> paths = new List<string>();
+            //scriptPath
             Dictionary<string,string> pathNames= new Dictionary<string,string>();// dictonary kudeto se zapazva path kato key i koi file tryabva da se pastne kato value
             Dictionary<string,string>pathValues= new Dictionary<string,string>(); // dictorny kudeto key=imae na file i value=texta koito ima
-            string basePath = @"C:\Users\paco\Desktop\Project\scriptProject\";//uses in every path below
-
-            //chast s otkrivane na common virable v vsichki failove
-            //dictonary key-file value-vsichki variables
-            //sravnyava koi variables se povtaryat v vseki file i tozi koito se povtarya v vsichki se pravi nov za nego i se dobavya script path za nego v drugite filove
-
-
+            string basePath = @"C:\Users\paco\Desktop\scripts\";//osven che se polzva ot kude da chete failove se izpozlva i kude da gi zapisva zashtoto realno promenya faila 
+            //parentPath
+            Dictionary<string, string> PpathNames = new Dictionary<string, string>();// dictonary kudeto se zapazva path kato key i koi file tryabva da se pastne kato value
+            Dictionary<string, string> PpathValues = new Dictionary<string, string>(); // dictorny kudeto key=imae na file i value=texta koito ima
             //cadcloud
-            /*
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\cadcloud");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\cadcloud\Test");
-            */
+
+            //NEED TO DELETE ROW BEFORE SCRIPTPATH {$scriptPath  = (Get-Item $PSScriptRoot).FullName}
+
+            //paths.Add(basePath+@"cadcloud");
+            //paths.Add(basePath+@"cadcloud\Test");
+
             //common
             paths.Add(basePath+@"common");
-            /*
-            //gearsix
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\gearsix");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\gearsix\Life");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\gearsix\Test");
+            
+            //gearsix         
+            paths.Add(basePath+@"gearsix\Life");
+            paths.Add(basePath+@"gearsix\Test");
+            paths.Add(basePath + @"gearsix");
             //loggedin
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\loggedin");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\loggedin\Life");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\loggedin\Life\LifeFromPreLife");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\loggedin\Life\LifeFromTrunk");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\loggedin\PreLife");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\loggedin\Test");
+            paths.Add(basePath+@"loggedin\Life");
+            paths.Add(basePath+@"loggedin\Life\LifeFromPreLife");
+            paths.Add(basePath+@"loggedin\Life\LifeFromTrunk");
+            paths.Add(basePath+@"loggedin\PreLife");
+            paths.Add(basePath+@"loggedin\Test");
+            paths.Add(basePath + @"loggedin");
             //office.usd
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\Office.USD");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\Office.USD\Life");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\Office.USD\Test");
+            paths.Add(basePath+@"Office.USD\Life");
+            paths.Add(basePath+@"Office.USD\Test");
+            paths.Add(basePath + @"Office.USD");
             //reefr
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\reefr");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\reefr\Life");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\reefr\Life\LifeFromPreLife");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\reefr\Life\LifeFromTrunk");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\reefr\PreLife");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\reefr\Test");
+            paths.Add(basePath+@"reefr\Life");
+            paths.Add(basePath+@"reefr\Life\LifeFromPreLife");
+            paths.Add(basePath+@"reefr\Life\LifeFromTrunk");
+            paths.Add(basePath+@"reefr\PreLife");
+            paths.Add(basePath+@"reefr\Test");
+            paths.Add(basePath + @"reefr");
             //safeco
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\safeco");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\safeco\Life");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\safeco\Life\LifeFromPreLife");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\safeco\Life\LifeFromTrunk");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\safeco\PreLife");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\safeco\Test");
+            paths.Add(basePath+@"safeco\Life");
+            paths.Add(basePath+@"safeco\Life\LifeFromPreLife");
+            paths.Add(basePath+@"safeco\Life\LifeFromTrunk");
+            paths.Add(basePath+@"safeco\PreLife");
+            paths.Add(basePath+@"safeco\Test");
+            paths.Add(basePath + @"safeco");
             //shooger
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\shooger");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\shooger\HotFix");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\shooger\Life");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\shooger\Life\LifeFromHotFix");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\shooger\Life\LifeFromPreLife");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\shooger\Life\LifeFromTrunk");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\shooger\PreLife");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\shooger\Test");
+            paths.Add(basePath+@"shooger\HotFix");
+            paths.Add(basePath+@"shooger\Life");
+            paths.Add(basePath+@"shooger\Life\LifeFromHotFix");
+            paths.Add(basePath+@"shooger\Life\LifeFromPreLife");
+            paths.Add(basePath+@"shooger\Life\LifeFromTrunk");
+            paths.Add(basePath+@"shooger\PreLife");
+            paths.Add(basePath+@"shooger\Test");
+            paths.Add(basePath + @"shooger");
             //sugarshackanimation
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\SugarshackAnimation");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\SugarshackAnimation\Life");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\SugarshackAnimation\Test");
+            paths.Add(basePath+@"SugarshackAnimation\Life");
+            paths.Add(basePath+@"SugarshackAnimation\Test");
+            paths.Add(basePath + @"SugarshackAnimation");
             //test
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\Test");
+            paths.Add(basePath+@"Test");
             //uncut
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\uncut");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\uncut\Life");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\uncut\Life\LifeFromPreLife");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\uncut\Life\LifeFromStage");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\uncut\Life\LifeFromTrunk");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\uncut\PreLife");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\uncut\Stage");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\uncut\Test");
+            paths.Add(basePath+@"uncut\Life");
+            paths.Add(basePath+@"uncut\Life\LifeFromPreLife");
+            paths.Add(basePath+@"uncut\Life\LifeFromStage");
+            paths.Add(basePath+@"uncut\Life\LifeFromTrunk");
+            paths.Add(basePath+@"uncut\PreLife");
+            paths.Add(basePath+@"uncut\Stage");
+            paths.Add(basePath+@"uncut\Test");
+            paths.Add(basePath + @"uncut");
             //usdirectory
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\usdirectory");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\usdirectory\HotFix");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\usdirectory\Life");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\usdirectory\Life\LifeFromHotFix");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\usdirectory\Life\LifeFromPreLife");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\usdirectory\Life\LifeFromTrunk");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\usdirectory\PreLife");
-            paths.Add(@"C:\Users\paco\Desktop\Project\scriptProject\usdirectory\Test");
-            */
+            paths.Add(basePath+@"usdirectory\HotFix");
+            paths.Add(basePath+@"usdirectory\Life");
+            paths.Add(basePath+@"usdirectory\Life\LifeFromHotFix");
+            paths.Add(basePath+@"usdirectory\Life\LifeFromPreLife");
+            paths.Add(basePath+@"usdirectory\Life\LifeFromTrunk");
+            paths.Add(basePath+@"usdirectory\PreLife");
+            paths.Add(basePath+@"usdirectory\Test");
+            paths.Add(basePath + @"usdirectory");
+
             foreach (var path in paths)
             {
                 foreach (string file in Directory.EnumerateFiles(path, "*.ps1"))
@@ -105,19 +104,31 @@ namespace ScriptProject
                         while ((lineRead = reader.ReadLine()) != null)
                         {
                             //Console.WriteLine( lineRead);
-                            if (lineRead.Contains(". \"$scriptPath\\") == true)
+                            if (lineRead.Contains(". \"$scriptPath\\") == true  )
                             {
-                                Console.WriteLine(file);
+                               // Console.WriteLine(file);
                                 string search = lineRead;
                                 string code = search.Substring(15);
                                 code = code.Trim('"');
-                                Console.WriteLine(code);
+                               // Console.WriteLine(code);
                                 try
                                 {
                                     pathNames.Add(file, code);
                                 }
                                 catch { }
 
+                            }else if(lineRead.Contains(". \"$parentPath\\") == true)
+                            {
+                               // Console.WriteLine(file);
+                                string search = lineRead;
+                                string code = search.Substring(15);
+                                code = code.Trim('"');
+                                //Console.WriteLine(code);
+                                try
+                                {
+                                    PpathNames.Add(file, code);
+                                }
+                                catch { }
                             }
                         }
                     }
@@ -126,26 +137,30 @@ namespace ScriptProject
                         pathValues.Add(file.Substring(path.Length+1), File.ReadAllText(file));
                     }catch { }                   
                 }
-            }
-            //pathName key=path na fail ,value=koi file tryabva da se dobavi
-            //pathValues key=ime na fail , value=content na file
 
-            foreach (KeyValuePair<string, string> item in pathNames)
-            {
-                string text = File.ReadAllText(item.Key);
-                text = text.Replace(". \"$scriptPath\\" + item.Value, pathValues[item.Value]);
-                string path = System.IO.Path.Combine(@"C:\Users\paco\Desktop\", item.Key.Substring(item.Key.LastIndexOf('\\')+1));
-                File.WriteAllText(path, text);
-            }             
-            /*
-            foreach (var path in pathNames)
-            {
-                Console.WriteLine(path);
+                foreach (KeyValuePair<string, string> item in pathNames)
+                {
+                    string text = File.ReadAllText(item.Key);
+                    text = text.Replace(". \"$scriptPath\\" + item.Value, pathValues[item.Value]);
+                    //string pathSave = System.IO.Path.Combine(@"C:\Users\paco\Desktop\", item.Key.Substring(item.Key.LastIndexOf('\\') + 1));
+                    string pathSave = System.IO.Path.Combine(path, item.Key.Substring(item.Key.LastIndexOf('\\') + 1));
+                    File.WriteAllText(pathSave, text);
+                    Console.WriteLine(pathSave);
+                }
+                /*
+                foreach (KeyValuePair<string, string> item in PpathNames)
+                {
+                    string text = File.ReadAllText(item.Key);
+                    text = text.Replace(". \"$parentPath\\" + item.Value, pathValues[item.Value]);
+                    //string pathSave = System.IO.Path.Combine(@"C:\Users\paco\Desktop\", item.Key.Substring(item.Key.LastIndexOf('\\') + 1));
+                    string pathSave = System.IO.Path.Combine(path, item.Key.Substring(item.Key.LastIndexOf('\\') + 1));
+                    File.WriteAllText(pathSave, text);
+                }*/
+                pathNames.Clear();
+                pathValues.Clear();
             }
-            foreach (var path in pathValues)
-            {
-                Console.WriteLine(path.Key);
-            }*/
+            
+           
         }
     }
 }
