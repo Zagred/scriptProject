@@ -15,8 +15,6 @@ namespace ScriptProject
         {
             string basePath = @"C:\Users\paco\Desktop\scripts\";//osven che se polzva ot kude da chete failove se izpozlva i kude da gi zapisva zashtoto realno promenya faila 
 
-            //folder Office.USD lpsva file UncutCommon
-
             //scriptPath
             Dictionary<string, string> pathNames = new Dictionary<string, string>();// dictonary kudeto se zapazva path kato key i koi file tryabva da se pastne kato value
             Dictionary<string, string> pathValues = new Dictionary<string, string>(); // dictorny kudeto key=imae na file i value=texta koito ima
@@ -49,12 +47,6 @@ namespace ScriptProject
             loggedin.Add(basePath + @"loggedin\Test");
             loggedin.Add(basePath + @"loggedin");
             folderContent.Add(basePath + @"loggedin", loggedin);
-
-            List<string> Office = new List<string>();
-            Office.Add(basePath + @"Office.USD\Life");
-            Office.Add(basePath + @"Office.USD\Test");
-            Office.Add(basePath + @"Office.USD");
-            folderContent.Add(basePath + @"Office.USD", Office);
 
             List<string> reefr = new List<string>();
             reefr.Add(basePath + @"reefr\Life");
@@ -162,6 +154,20 @@ namespace ScriptProject
                         }
                         try
                         {
+                            string[] readText = File.ReadAllLines(filepath);
+
+                            File.WriteAllText(filepath, String.Empty);
+
+                            using (StreamWriter writer = new StreamWriter(filepath))
+                            {
+                                foreach (string s in readText)
+                                {
+                                    if (s.Contains("#")==false)
+                                    {
+                                        writer.WriteLine(s);
+                                    }
+                                }
+                            }
                             pathValues.Add(filepath.Substring(path.Length + 1), File.ReadAllText(filepath));
                         }
                         catch { }
@@ -172,6 +178,7 @@ namespace ScriptProject
                     {
                         foreach (KeyValuePair<string, string> item in pathNames)
                         {
+
                             string text = File.ReadAllText(item.Key);
                             text = text.Replace("$scriptPath  = (Get-Item $PSScriptRoot).FullName", null);
                             text = text.Replace(". \"$scriptPath\\" + item.Value, pathValues[item.Value]);
@@ -201,7 +208,39 @@ namespace ScriptProject
                 PpathNames.Clear();
                 pathValues.Clear();
             }
+            Dictionary<string,int> keyValuePairs = new Dictionary<string,int>();
+            foreach (KeyValuePair<string, List<string>> file in folderContent)
+            {
+                foreach (string path in file.Value)
+                {
+                    foreach (string filepath in Directory.GetFiles(path, "*.ps1"))
+                    {
+                        int i = 0;
+                        string[] readText = File.ReadAllLines(filepath);
+                        foreach (string s in readText)
+                        {
+                            if (s.Contains("$Global:") == true && s[0]=='$')
+                            {
+                                try
+                                {
+                                    keyValuePairs.Add(s, ++i);
+                                }
+                                catch { }
+                            }
+                        }
+                    }
+                    using (StreamWriter write = new StreamWriter(Path.Combine(path + "\\Variables.ps1")))
+                    {
+                        foreach (var item in keyValuePairs)
+                        {
+                            if (item.Value == file.Value.Count())
+                            {
+                                write.WriteLine(item.Key);
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
-//part2 idea: zabpazva vsichki v string(obshtoto) i sled tova suzdava fail s nekvo ima s danni tozi string preglejdat se failvoete pak i replace na vseki file s script ili parent path
