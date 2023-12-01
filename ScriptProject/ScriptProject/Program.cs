@@ -35,39 +35,40 @@ namespace ScriptProject
             folderContent.Add(basePath + @"common", common);
 
             List<string> gearsix = new List<string>();
+            gearsix.Add(basePath + @"gearsix");
             gearsix.Add(basePath + @"gearsix\Life");
             gearsix.Add(basePath + @"gearsix\Test");
-            gearsix.Add(basePath + @"gearsix");
             folderContent.Add(basePath + @"gearsix", gearsix);
 
             List<string> loggedin = new List<string>();
+            loggedin.Add(basePath + @"loggedin");
             loggedin.Add(basePath + @"loggedin\Life");
             loggedin.Add(basePath + @"loggedin\Life\LifeFromPreLife");
             loggedin.Add(basePath + @"loggedin\Life\LifeFromTrunk");
             loggedin.Add(basePath + @"loggedin\PreLife");
             loggedin.Add(basePath + @"loggedin\Test");
-            loggedin.Add(basePath + @"loggedin");
             folderContent.Add(basePath + @"loggedin", loggedin);
 
             List<string> reefr = new List<string>();
+            reefr.Add(basePath + @"reefr");
             reefr.Add(basePath + @"reefr\Life");
             reefr.Add(basePath + @"reefr\Life\LifeFromPreLife");
             reefr.Add(basePath + @"reefr\Life\LifeFromTrunk");
             reefr.Add(basePath + @"reefr\PreLife");
             reefr.Add(basePath + @"reefr\Test");
-            reefr.Add(basePath + @"reefr");
             folderContent.Add(basePath + @"reefr", reefr);
 
             List<string> safeco = new List<string>();
+            safeco.Add(basePath + @"safeco");
             safeco.Add(basePath + @"safeco\Life");
             safeco.Add(basePath + @"safeco\Life\LifeFromPreLife");
             safeco.Add(basePath + @"safeco\Life\LifeFromTrunk");
             safeco.Add(basePath + @"safeco\PreLife");
             safeco.Add(basePath + @"safeco\Test");
-            safeco.Add(basePath + @"safeco");
             folderContent.Add(basePath + @"safeco", safeco);
 
             List<string> shooger = new List<string>();
+            shooger.Add(basePath + @"shooger");
             shooger.Add(basePath + @"shooger\HotFix");
             shooger.Add(basePath + @"shooger\Life");
             shooger.Add(basePath + @"shooger\Life\LifeFromHotFix");
@@ -75,20 +76,20 @@ namespace ScriptProject
             shooger.Add(basePath + @"shooger\Life\LifeFromTrunk");
             shooger.Add(basePath + @"shooger\PreLife");
             shooger.Add(basePath + @"shooger\Test");
-            shooger.Add(basePath + @"shooger");
             folderContent.Add(basePath + @"shooger", shooger);
 
             List<string> SugarshackAnimation = new List<string>();
+            SugarshackAnimation.Add(basePath + @"SugarshackAnimation");
             SugarshackAnimation.Add(basePath + @"SugarshackAnimation\Life");
             SugarshackAnimation.Add(basePath + @"SugarshackAnimation\Test");
-            SugarshackAnimation.Add(basePath + @"SugarshackAnimation");
             folderContent.Add(basePath + @"SugarshackAnimation", SugarshackAnimation);
 
             List<string> Test = new List<string>();
             Test.Add(basePath + @"Test");
             folderContent.Add(basePath + @"Test", Test);
 
-            List<string> uncut = new List<string>();
+            List<string> uncut = new List<string>(); 
+            uncut.Add(basePath + @"uncut");
             uncut.Add(basePath + @"uncut\Life");
             uncut.Add(basePath + @"uncut\Life\LifeFromPreLife");
             uncut.Add(basePath + @"uncut\Life\LifeFromStage");
@@ -96,10 +97,10 @@ namespace ScriptProject
             uncut.Add(basePath + @"uncut\PreLife");
             uncut.Add(basePath + @"uncut\Stage");
             uncut.Add(basePath + @"uncut\Test");
-            uncut.Add(basePath + @"uncut");
             folderContent.Add(basePath + @"uncut", uncut);
 
             List<string> usdirectory = new List<string>();
+            usdirectory.Add(basePath + @"usdirectory");
             usdirectory.Add(basePath + @"usdirectory\HotFix");
             usdirectory.Add(basePath + @"usdirectory\Life");
             usdirectory.Add(basePath + @"usdirectory\Life\LifeFromHotFix");
@@ -107,7 +108,6 @@ namespace ScriptProject
             usdirectory.Add(basePath + @"usdirectory\Life\LifeFromTrunk");
             usdirectory.Add(basePath + @"usdirectory\PreLife");
             usdirectory.Add(basePath + @"usdirectory\Test");
-            usdirectory.Add(basePath + @"usdirectory");
             folderContent.Add(basePath + @"usdirectory", usdirectory);
 
 
@@ -176,24 +176,9 @@ namespace ScriptProject
                         }
                         catch { }
                     }
-
-                    //ScriptPath 
-                    try
-                    {
-                        foreach (KeyValuePair<string, string> item in pathNames)
-                        {
-
-                            string text = File.ReadAllText(item.Key);
-                            text = text.Replace("$scriptPath  = (Get-Item $PSScriptRoot).FullName", null);
-                            text = text.Replace(". \"$scriptPath\\" + item.Value, pathValues[item.Value]);
-                            File.WriteAllText(item.Key, text);
-                        }
-                    }
-                    catch { }
-                    //ScriptPath 
-
                 }
-                //ParentPath 
+
+                //ScriptPath 
                 try
                 {
                     foreach (KeyValuePair<string, string> item in PpathNames)
@@ -203,17 +188,23 @@ namespace ScriptProject
                         text = text.Replace(". \"$parentPath\\" + item.Value, pathValues[item.Value]);
                         File.WriteAllText(item.Key, text);
                     }
-
+                    foreach (KeyValuePair<string, string> item in pathNames)
+                    {
+                        string text = File.ReadAllText(item.Key);
+                        text = text.Replace("$scriptPath  = (Get-Item $PSScriptRoot).FullName", null);
+                        text = text.Replace(". \"$scriptPath\\" + item.Value, pathValues[item.Value]);
+                        File.WriteAllText(item.Key, text);
+                    }
                 }
                 catch { }
-                //ParentPath
+                //ScriptPath 
 
                 pathNames.Clear();
                 PpathNames.Clear();
                 pathValues.Clear();
             }
+            
             Dictionary<string,int> keyValuePairs = new Dictionary<string,int>();
-            //add at first line script path row for Variables at an yfile
             foreach (KeyValuePair<string, List<string>> file in folderContent)
             {
                 foreach (string path in file.Value)
@@ -253,12 +244,21 @@ namespace ScriptProject
 
                     foreach (string filePath in Directory.GetFiles(path, "*.ps1"))
                     {
-                         string lines = "$scriptPath  = (Get-Item $PSScriptRoot).FullName\r\n. \"$scriptPath\\Variables.ps1\"";
-                         lines += File.ReadAllLines(filePath).Where(arg => !string.IsNullOrWhiteSpace(arg));
+                        if (filePath.Substring(path.Length) != "\\Variables.ps1")
+                        {
+                            string[] lines = File.ReadAllLines(filePath)
+                                .Where(line => !string.IsNullOrWhiteSpace(line) && !line.TrimStart().StartsWith("#"))
+                                .ToArray();
 
-                        File.WriteAllText(filePath, lines);
+                            string scriptPathLine = "$scriptPath  = (Get-Item $PSScriptRoot).FullName";
+                            string variablesLine = ". \"$scriptPath\\Variables.ps1\"";
+                            List<string> updatedLines = new List<string> { scriptPathLine, variablesLine };
+                            updatedLines.AddRange(lines);
+
+                            File.WriteAllLines(filePath, updatedLines);
+                        }
                     }
-                    
+
                 }
             }
         }
