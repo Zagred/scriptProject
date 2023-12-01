@@ -24,7 +24,7 @@ namespace ScriptProject
             Dictionary<string, string> PpathNames = new Dictionary<string, string>();
 
             //key=name of file, value=content of file
-            Dictionary<string, string> pathValues = new Dictionary<string, string>(); 
+            Dictionary<string, string> pathValues = new Dictionary<string, string>();
 
             Dictionary<string, List<string>> folderContent = new Dictionary<string, List<string>>();
 
@@ -91,7 +91,7 @@ namespace ScriptProject
             Test.Add(basePath + @"Test");
             folderContent.Add(basePath + @"Test", Test);
 
-            List<string> uncut = new List<string>(); 
+            List<string> uncut = new List<string>();
             uncut.Add(basePath + @"uncut");
             uncut.Add(basePath + @"uncut\Life");
             uncut.Add(basePath + @"uncut\Life\LifeFromPreLife");
@@ -169,9 +169,10 @@ namespace ScriptProject
                                     if (s.Contains("#") == false)
                                     {
                                         writer.WriteLine(s);
-                                    }else if (s.Contains("$Global:") == true && s[0]=='#')
+                                    }
+                                    else if (s.Contains("$Global:") == true && s[0] == '#')
                                     {
-                                        writer.WriteLine(s.Replace("#",string.Empty));
+                                        writer.WriteLine(s.Replace("#", string.Empty));
                                     }
                                 }
                             }
@@ -206,8 +207,8 @@ namespace ScriptProject
                 PpathNames.Clear();
                 pathValues.Clear();
             }
-            
-            Dictionary<string,int> keyValuePairs = new Dictionary<string,int>();
+
+            Dictionary<string, int> keyValuePairs = new Dictionary<string, int>();
             foreach (KeyValuePair<string, List<string>> file in folderContent)
             {
                 foreach (string path in file.Value)
@@ -250,7 +251,7 @@ namespace ScriptProject
                     //adding extend row for  every file for variables.ps1
                     foreach (string filePath in Directory.GetFiles(path, "*.ps1"))
                     {
-                        if (filePath.Substring(path.Length) != "\\Variables.ps1")
+                        if (filePath.Substring(path.Length) != "\\Variables.ps1" && new FileInfo(Path.Combine(path, "Variables.ps1")).Length != 0)
                         {
                             string[] lines = File.ReadAllLines(filePath)
                                 .Where(line => !string.IsNullOrWhiteSpace(line) && !line.TrimStart().StartsWith("#"))
@@ -263,8 +264,13 @@ namespace ScriptProject
 
                             File.WriteAllLines(filePath, updatedLines);
                         }
+                        else
+                        {
+                            string[] lines = File.ReadAllLines(filePath).Where(line => !string.IsNullOrWhiteSpace(line) && !line.TrimStart().StartsWith("#")).ToArray();
+                            File.WriteAllLines(filePath, lines);
+                        }
                     }
-                    //deleting empty variables.ps1 files + remove used viruables in other files
+                    // remove used viruables in other files
                     foreach (string filePath in Directory.GetFiles(path, "*.ps1"))
                     {
                         if (filePath.Substring(path.Length) != "\\Variables.ps1")
@@ -273,14 +279,19 @@ namespace ScriptProject
                             string[] linesToKeep = File.ReadLines(filePath).ToArray();
                             for (int j = 0; j < lines.Length; j++)
                             {
-                                linesToKeep= linesToKeep.Where(line => line != lines[j]).ToArray();
+                                linesToKeep = linesToKeep.Where(line => line != lines[j]).ToArray();
                             }
                             File.WriteAllLines(filePath, linesToKeep);
-                        }else if(File.ReadAllLines(filePath)==null)
+                        }
+                    }
+                    //deleting empty variables.ps1 files
+                    foreach (string filePath in Directory.GetFiles(path, "Variables.ps1"))
+                    {
+                        if(new FileInfo(filePath).Length == 0)
                         {
                             File.Delete(filePath);
                         }
-                    }
+                    }    
                 }
             }
         }
