@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -162,9 +163,12 @@ namespace ScriptProject
                             {
                                 foreach (string s in readText)
                                 {
-                                    if (s.Contains("#")==false)
+                                    if (s.Contains("#") == false)
                                     {
                                         writer.WriteLine(s);
+                                    }else if (s.Contains("$Global:") == true && s[0]=='#')
+                                    {
+                                        writer.WriteLine(s.Replace("#",string.Empty));
                                     }
                                 }
                             }
@@ -209,23 +213,28 @@ namespace ScriptProject
                 pathValues.Clear();
             }
             Dictionary<string,int> keyValuePairs = new Dictionary<string,int>();
+            //add at first line script path row for Variables at an yfile
             foreach (KeyValuePair<string, List<string>> file in folderContent)
             {
                 foreach (string path in file.Value)
                 {
+                    int i = 0;
                     foreach (string filepath in Directory.GetFiles(path, "*.ps1"))
                     {
-                        int i = 0;
+                        i++;
                         string[] readText = File.ReadAllLines(filepath);
                         foreach (string s in readText)
                         {
-                            if (s.Contains("$Global:") == true && s[0]=='$')
+                            if (s.Contains("$Global:") == true && (s[0] == '#' || s[0] == '$') && s[1] >= 33)
                             {
                                 try
                                 {
-                                    keyValuePairs.Add(s, ++i);
+                                    keyValuePairs.Add(s, 1);
                                 }
-                                catch { }
+                                catch
+                                {
+                                    keyValuePairs[s]++;
+                                }
                             }
                         }
                     }
@@ -233,12 +242,23 @@ namespace ScriptProject
                     {
                         foreach (var item in keyValuePairs)
                         {
-                            if (item.Value == file.Value.Count())
+                            if (item.Value == i)
                             {
                                 write.WriteLine(item.Key);
                             }
                         }
                     }
+
+                    keyValuePairs.Clear();
+
+                    foreach (string filePath in Directory.GetFiles(path, "*.ps1"))
+                    {
+                         string lines = "$scriptPath  = (Get-Item $PSScriptRoot).FullName\r\n. \"$scriptPath\\Variables.ps1\"";
+                         lines += File.ReadAllLines(filePath).Where(arg => !string.IsNullOrWhiteSpace(arg));
+
+                        File.WriteAllText(filePath, lines);
+                    }
+                    
                 }
             }
         }
