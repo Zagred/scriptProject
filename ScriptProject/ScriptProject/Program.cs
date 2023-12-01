@@ -14,14 +14,17 @@ namespace ScriptProject
     {
         static void Main(string[] args)
         {
-            string basePath = @"C:\Users\paco\Desktop\scripts\";//osven che se polzva ot kude da chete failove se izpozlva i kude da gi zapisva zashtoto realno promenya faila 
+            //global path MUST BE CHANGE FOR OTHER DEVICES
+            string basePath = @"C:\Users\paco\Desktop\scripts\";
 
-            //scriptPath
-            Dictionary<string, string> pathNames = new Dictionary<string, string>();// dictonary kudeto se zapazva path kato key i koi file tryabva da se pastne kato value
-            Dictionary<string, string> pathValues = new Dictionary<string, string>(); // dictorny kudeto key=imae na file i value=texta koito ima
+            //scriptPath key=path of file value=which file need to be added
+            Dictionary<string, string> pathNames = new Dictionary<string, string>();
 
-            //parentPath
-            Dictionary<string, string> PpathNames = new Dictionary<string, string>();// dictonary kudeto se zapazva path kato key i koi file tryabva da se pastne kato value
+            //parentPath key=path of file value=which file need to be added
+            Dictionary<string, string> PpathNames = new Dictionary<string, string>();
+
+            //key=name of file, value=content of file
+            Dictionary<string, string> pathValues = new Dictionary<string, string>(); 
 
             Dictionary<string, List<string>> folderContent = new Dictionary<string, List<string>>();
 
@@ -178,7 +181,7 @@ namespace ScriptProject
                     }
                 }
 
-                //ScriptPath 
+                //ScriptPath + ParentPath replacement
                 try
                 {
                     foreach (KeyValuePair<string, string> item in PpathNames)
@@ -197,7 +200,7 @@ namespace ScriptProject
                     }
                 }
                 catch { }
-                //ScriptPath 
+                //ScriptPath + ParentPath replacement
 
                 pathNames.Clear();
                 PpathNames.Clear();
@@ -209,6 +212,7 @@ namespace ScriptProject
             {
                 foreach (string path in file.Value)
                 {
+                    //function to find which rows are variables
                     int i = 0;
                     foreach (string filepath in Directory.GetFiles(path, "*.ps1"))
                     {
@@ -229,6 +233,7 @@ namespace ScriptProject
                             }
                         }
                     }
+                    //adding variables used in every files in selected folder
                     using (StreamWriter write = new StreamWriter(Path.Combine(path + "\\Variables.ps1")))
                     {
                         foreach (var item in keyValuePairs)
@@ -242,6 +247,7 @@ namespace ScriptProject
 
                     keyValuePairs.Clear();
 
+                    //adding extend row for  every file for variables.ps1
                     foreach (string filePath in Directory.GetFiles(path, "*.ps1"))
                     {
                         if (filePath.Substring(path.Length) != "\\Variables.ps1")
@@ -258,7 +264,23 @@ namespace ScriptProject
                             File.WriteAllLines(filePath, updatedLines);
                         }
                     }
-
+                    //deleting empty variables.ps1 files + remove used viruables in other files
+                    foreach (string filePath in Directory.GetFiles(path, "*.ps1"))
+                    {
+                        if (filePath.Substring(path.Length) != "\\Variables.ps1")
+                        {
+                            string[] lines = File.ReadAllLines(Path.Combine(path + "\\Variables.ps1"));
+                            string[] linesToKeep = File.ReadLines(filePath).ToArray();
+                            for (int j = 0; j < lines.Length; j++)
+                            {
+                                linesToKeep= linesToKeep.Where(line => line != lines[j]).ToArray();
+                            }
+                            File.WriteAllLines(filePath, linesToKeep);
+                        }else if(File.ReadAllLines(filePath)==null)
+                        {
+                            File.Delete(filePath);
+                        }
+                    }
                 }
             }
         }
