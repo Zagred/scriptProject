@@ -14,17 +14,6 @@ namespace ScriptProject
     {
         static void Main(string[] args)
         {
-            //global path MUST BE CHANGE FOR OTHER DEVICES
-            string basePath = @"C:\Users\paco\Desktop\scripts\";
-
-            //scriptPath key=path of file value=which file need to be added
-            Dictionary<string, string> pathNames = new Dictionary<string, string>();
-
-            //parentPath key=path of file value=which file need to be added
-            Dictionary<string, string> PpathNames = new Dictionary<string, string>();
-
-            //key=name of file, value=content of file
-            Dictionary<string, string> pathValues = new Dictionary<string, string>();
 
             Dictionary<string, List<string>> folderContent = new Dictionary<string, List<string>>();
 
@@ -113,7 +102,30 @@ namespace ScriptProject
             usdirectory.Add(basePath + @"usdirectory\Test");
             folderContent.Add(basePath + @"usdirectory", usdirectory);
 
+            return folderContent;
+        }
+        //
+        
+        static void Main(string[] args)
+        {
 
+            //da sa v otdelen klas ili inalicializirat
+            //da napravi i funkciite v novi klasove
+            //da probvam da go naprava s nova nahcin
+
+            //global path MUST BE CHANGE FOR OTHER DEVICES
+            string basePath = @"C:\Users\paco\Desktop\scripts\";
+
+            //scriptPath key=path of file value=which file need to be added
+            Dictionary<string, string> pathNames = new Dictionary<string, string>();
+
+            //parentPath key=path of file value=which file need to be added
+            Dictionary<string, string> PpathNames = new Dictionary<string, string>();
+
+            //key=name of file, value=content of file
+            Dictionary<string, string> pathValues = new Dictionary<string, string>();
+
+            Dictionary<string, List<string>> folderContent=Init(basePath);
             foreach (KeyValuePair<string, List<string>> file in folderContent)
             {
                 foreach (string path in file.Value)
@@ -180,71 +192,19 @@ namespace ScriptProject
                         }
                         catch { }
                     }
-                }
-
-                //ScriptPath + ParentPath replacement
-                try
-                {
-                    foreach (KeyValuePair<string, string> item in PpathNames)
+                    //ScriptPath (working)
+                    try
                     {
-                        string text = File.ReadAllText(item.Key);
-                        text = text.Replace("$parentPath  = (Get-Item $PSScriptRoot).Parent.FullName", null);
-                        text = text.Replace(". \"$parentPath\\" + item.Value, pathValues[item.Value]);
-                        File.WriteAllText(item.Key, text);
-                    }
-                    foreach (KeyValuePair<string, string> item in pathNames)
-                    {
-                        string text = File.ReadAllText(item.Key);
-                        text = text.Replace("$scriptPath  = (Get-Item $PSScriptRoot).FullName", null);
-                        text = text.Replace(". \"$scriptPath\\" + item.Value, pathValues[item.Value]);
-                        File.WriteAllText(item.Key, text);
-                    }
-                }
-                catch { }
-                //ScriptPath + ParentPath replacement
-
-                pathNames.Clear();
-                PpathNames.Clear();
-                pathValues.Clear();
-            }
-
-            Dictionary<string, int> keyValuePairs = new Dictionary<string, int>();
-            foreach (KeyValuePair<string, List<string>> file in folderContent)
-            {
-                foreach (string path in file.Value)
-                {
-                    //function to find which rows are variables
-                    int i = 0;
-                    foreach (string filepath in Directory.GetFiles(path, "*.ps1"))
-                    {
-                        i++;
-                        string[] readText = File.ReadAllLines(filepath);
-                        foreach (string s in readText)
+                        foreach (KeyValuePair<string, string> item in pathNames)
                         {
-                            if (s.Contains("$Global:") == true && (s[0] == '#' || s[0] == '$') && s[1] >= 33)
-                            {
-                                try
-                                {
-                                    keyValuePairs.Add(s, 1);
-                                }
-                                catch
-                                {
-                                    keyValuePairs[s]++;
-                                }
-                            }
+                            string text = File.ReadAllText(item.Key);
+                            text = text.Replace("$scriptPath  = (Get-Item $PSScriptRoot).FullName", null);
+                            text = text.Replace(". \"$scriptPath\\" + item.Value, pathValues[item.Value]);
+                            string pathSave = System.IO.Path.Combine(path, item.Key.Substring(item.Key.LastIndexOf('\\') + 1));
+                            File.WriteAllText(pathSave, text);
                         }
-                    }
-                    //adding variables used in every files in selected folder
-                    using (StreamWriter write = new StreamWriter(Path.Combine(path + "\\Variables.ps1")))
-                    {
-                        foreach (var item in keyValuePairs)
-                        {
-                            if (item.Value == i)
-                            {
-                                write.WriteLine(item.Key);
-                            }
-                        }
-                    }
+
+                        //ScriptPath (working)
 
                     keyValuePairs.Clear();
 
@@ -262,37 +222,25 @@ namespace ScriptProject
                             List<string> updatedLines = new List<string> { scriptPathLine, variablesLine };
                             updatedLines.AddRange(lines);
 
-                            File.WriteAllLines(filePath, updatedLines);
-                        }
-                        else
-                        {
-                            string[] lines = File.ReadAllLines(filePath).Where(line => !string.IsNullOrWhiteSpace(line) && !line.TrimStart().StartsWith("#")).ToArray();
-                            File.WriteAllLines(filePath, lines);
-                        }
-                    }
-                    // remove used viruables in other files
-                    foreach (string filePath in Directory.GetFiles(path, "*.ps1"))
-                    {
-                        if (filePath.Substring(path.Length) != "\\Variables.ps1")
-                        {
-                            string[] lines = File.ReadAllLines(Path.Combine(path + "\\Variables.ps1"));
-                            string[] linesToKeep = File.ReadLines(filePath).ToArray();
-                            for (int j = 0; j < lines.Length; j++)
-                            {
-                                linesToKeep = linesToKeep.Where(line => line != lines[j]).ToArray();
-                            }
-                            File.WriteAllLines(filePath, linesToKeep);
-                        }
-                    }
-                    //deleting empty variables.ps1 files
-                    foreach (string filePath in Directory.GetFiles(path, "Variables.ps1"))
-                    {
-                        if(new FileInfo(filePath).Length == 0)
-                        {
-                            File.Delete(filePath);
-                        }
-                    }    
                 }
+                Console.WriteLine("---------------------");
+                foreach (KeyValuePair<string, string> item in PpathNames)
+                {
+                    Console.WriteLine(item);
+                }
+                Console.WriteLine();
+                foreach (KeyValuePair<string, string> item in pathNames)
+                {
+                    Console.WriteLine(item);
+                }
+                Console.WriteLine( );
+                foreach (var item in pathValues)
+                {
+                    Console.WriteLine(item.Key);
+                }
+                pathNames.Clear();
+                PpathNames.Clear();
+                pathValues.Clear();
             }
         }
     }
