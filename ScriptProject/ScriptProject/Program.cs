@@ -11,17 +11,20 @@ namespace ScriptProject
 {
     internal class Program
     {
-        static void Main(string[] args)
+        //method to add all paths in folders
+        public static Dictionary<string, List<string>> Init(string basePath)
         {
-            string basePath = @"C:\Users\paco\Desktop\scripts\";//osven che se polzva ot kude da chete failove se izpozlva i kude da gi zapisva zashtoto realno promenya faila 
+            //global path MUST BE CHANGE FOR OTHER DEVICES
+            string basePath = @"C:\Users\paco\Desktop\scripts\";
 
+            //scriptPath key=path of file value=which file need to be added
+            Dictionary<string, string> pathNames = new Dictionary<string, string>();
 
-            //scriptPath
-            Dictionary<string, string> pathNames = new Dictionary<string, string>();// dictonary kudeto se zapazva path kato key i koi file tryabva da se pastne kato value
-            Dictionary<string, string> pathValues = new Dictionary<string, string>(); // dictorny kudeto key=imae na file i value=texta koito ima
+            //parentPath key=path of file value=which file need to be added
+            Dictionary<string, string> PpathNames = new Dictionary<string, string>();
 
-            //parentPath
-            Dictionary<string, string> PpathNames = new Dictionary<string, string>();// dictonary kudeto se zapazva path kato key i koi file tryabva da se pastne kato value
+            //key=name of file, value=content of file
+            Dictionary<string, string> pathValues = new Dictionary<string, string>();
 
             Dictionary<string, List<string>> folderContent = new Dictionary<string, List<string>>();
 
@@ -116,7 +119,30 @@ namespace ScriptProject
             usdirectory.Add(basePath + @"usdirectory");
             folderContent.Add(basePath + @"usdirectory", usdirectory);
 
+            return folderContent;
+        }
+        //
+        
+        static void Main(string[] args)
+        {
 
+            //da sa v otdelen klas ili inalicializirat
+            //da napravi i funkciite v novi klasove
+            //da probvam da go naprava s nova nahcin
+
+            //global path MUST BE CHANGE FOR OTHER DEVICES
+            string basePath = @"C:\Users\paco\Desktop\scripts\";
+
+            //scriptPath key=path of file value=which file need to be added
+            Dictionary<string, string> pathNames = new Dictionary<string, string>();
+
+            //parentPath key=path of file value=which file need to be added
+            Dictionary<string, string> PpathNames = new Dictionary<string, string>();
+
+            //key=name of file, value=content of file
+            Dictionary<string, string> pathValues = new Dictionary<string, string>();
+
+            Dictionary<string, List<string>> folderContent=Init(basePath);
             foreach (KeyValuePair<string, List<string>> file in folderContent)
             {
                 foreach (string path in file.Value)
