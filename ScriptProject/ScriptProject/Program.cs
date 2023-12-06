@@ -11,10 +11,10 @@ namespace ScriptProject
 {
     internal class Program
     {
-        //method to add all paths in folders
-        public static Dictionary<string, List<string>> Init(string basePath)
-        {
 
+        //method to add all paths in folders
+        private Dictionary<string, List<string>> Init(string basePath)
+        {
             Dictionary<string, List<string>> folderContent = new Dictionary<string, List<string>>();
 
             List<string> cadcloud = new List<string>();
@@ -110,8 +110,9 @@ namespace ScriptProject
 
             return folderContent;
         }
+
         //findign rows with script and parent paths in files
-        public static void successorRowSearcher(Dictionary<string, List<string>> folderContent)
+        private void successorRowSearcher(Dictionary<string, List<string>> folderContent)
         {
             //scriptPath key=path of file value=which file need to be added
             Dictionary<string, string> pathNames = new Dictionary<string, string>();
@@ -216,8 +217,9 @@ namespace ScriptProject
                 pathValues.Clear();
             }
         }
+
         // add new files for common virablees in every folder
-        public static void commonVariables(Dictionary<string, List<string>> folderContent)
+        private void commonVariables(Dictionary<string, List<string>> folderContent)
         {
             Dictionary<string, int> keyValuePairs = new Dictionary<string, int>();
             foreach (KeyValuePair<string, List<string>> file in folderContent)
@@ -306,14 +308,17 @@ namespace ScriptProject
                 }
             }
         }
+
         static void Main(string[] args)
         {
             //global path MUST BE CHANGE FOR OTHER DEVICES
             string basePath = @"C:\Users\paco\Desktop\scripts\";
 
-            Dictionary<string, List<string>> folderContent = Init(basePath);
-            successorRowSearcher(folderContent);
-            commonVariables(folderContent);
+            Program obj = new Program(); 
+
+            Dictionary<string, List<string>> folderContent = obj.Init(basePath);
+            obj.successorRowSearcher(folderContent);
+            obj.commonVariables(folderContent);
         }
     }
 }
