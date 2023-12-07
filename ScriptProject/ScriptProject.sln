@@ -5,6 +5,8 @@ VisualStudioVersion = 17.7.34024.191
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScriptProject", "ScriptProject\ScriptProject.csproj", "{4F168579-78D3-4C01-9104-BA27FCCF09D6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ps1FilesLibrary", "Ps1FilesLibrary\Ps1FilesLibrary.csproj", "{598E806A-CD5F-45EA-A8AB-6DFD4A4E0645}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{4F168579-78D3-4C01-9104-BA27FCCF09D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4F168579-78D3-4C01-9104-BA27FCCF09D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4F168579-78D3-4C01-9104-BA27FCCF09D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{598E806A-CD5F-45EA-A8AB-6DFD4A4E0645}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{598E806A-CD5F-45EA-A8AB-6DFD4A4E0645}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{598E806A-CD5F-45EA-A8AB-6DFD4A4E0645}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{598E806A-CD5F-45EA-A8AB-6DFD4A4E0645}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

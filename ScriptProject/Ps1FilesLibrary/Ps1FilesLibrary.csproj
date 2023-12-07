@@ -4,17 +4,16 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{4F168579-78D3-4C01-9104-BA27FCCF09D6}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>ScriptProject</RootNamespace>
-    <AssemblyName>ScriptProject</AssemblyName>
+    <ProjectGuid>{598E806A-CD5F-45EA-A8AB-6DFD4A4E0645}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Ps1FilesLibrary</RootNamespace>
+    <AssemblyName>Ps1FilesLibrary</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -24,7 +23,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -43,17 +41,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="Ps1Files.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Ps1FilesLibrary\Ps1FilesLibrary.csproj">
-      <Project>{598e806a-cd5f-45ea-a8ab-6dfd4a4e0645}</Project>
-      <Name>Ps1FilesLibrary</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
