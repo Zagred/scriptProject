@@ -27,17 +27,15 @@ namespace ScriptProject
             }
             return folderContent;
         }
-        //method to add all paths folders into dictonary witch key=path value=list of paths for this folder
-        private static Dictionary<string, List<string>> Init_Dict(string folder)
+        //method to find  all folders
+        private static List<string> Init_Dict(string folder)
         {
-            Dictionary<string, List<string>> folderContent = new Dictionary<string, List<string>> ();
+             List<string> folderContent = new  List<string> ();
             foreach (var directory in Directory.GetDirectories(folder))
             {
-                try
-                {
-                    folderContent.Add(directory, Init_List(directory));
-                }
-                catch { }
+
+                    folderContent.AddRange(Init_List(directory));
+
             }
             return folderContent;
         }
@@ -46,11 +44,10 @@ namespace ScriptProject
             //global path MUST BE CHANGE FOR OTHER DEVICES
             string basePath = @"C:\Users\paco\Desktop\scripts\";
 
-            Dictionary<string, List<string>> folderContent = Init_Dict(basePath);
-
+            List<string> folderContent = Init_Dict(basePath);
             var ps1 = new Ps1Files();
-            ps1.successorRowSearcher(folderContent);
-            ps1.commonVariables(folderContent);
+            ps1.successorRowSearcher(folderContent,basePath);
+            //ps1.commonVariables(folderContent);//
         }
     }
 }
