@@ -13,10 +13,9 @@ namespace Ps1FilesLibrary
         /*
          todo:
         1.da mina prez vsichki failove i da vida koi afailove tryabva da se mahant i da sa v otdelni funkcii ROOTHPATH. SCRIPTPATH, PARENTPATH, LOCALSCRIPPATH,("$ourPath "$parent?)(done)
-        2.da zameni kodovete kato glodea po vajnost PURVO ROOTHPATH,PARENTPATH,SCRIPPATH,LOCALSCRIPTPATH
-        3.da se suzdade file commonvariables za vseki foulder kudeto subira vsichki GLOBAL  promenlivi i da se nasledyava ot vseki drug file s SCRIPTPATH
+        2.da zameni kodovete kato glodea po vajnost PURVO ROOTHPATH,PARENTPATH,SCRIPPATH,LOCALSCRIPTPATH(done BEZ ROOTH PATH)
+        3.da se suzdade file  za vseki foulder kudeto subira vsichki GLOBAL  promenlivi i da se nasledyava ot vseki drug file s SCRIPTPATH(done no bez posochenite pathove)
          */
-        //trim function zashtoto default trima ne raboteshe
         public static string Trim(string str, char trimChar)
         {
             string result = string.Empty;
@@ -29,25 +28,32 @@ namespace Ps1FilesLibrary
             }
             return result;
         }
-        //change summary
+        public static string[] RemoveComments(string[] content)
+        {
+             //string indexToRemove = "#";
+             //content=content.Where(x => x.Contains(indexToRemove)==false).ToArray();//maha vseki red koito sudurja #
+            content = content.Where(arg => !string.IsNullOrWhiteSpace(arg)).ToArray();//maha vseki red koito ne sudurja nishto
+            return content;
+        }
         /// <summary>
         /// 3-te metoda rabotat kato izpolzvam fileContent da mahant nasledyavashtite redove i da trimne file-a koito nasledya i go obedinayva s path i go dobavya v folecontet i go zapisva kato nov file
         /// </summary>
         /// <param name="filepath"></param> path na file koito izpolzva v momenta
         /// <param name="fileContent"></param> teksta na file koito polzvame
         /// <param name="path"></param> path ot koya papka e file
-        public static void ourPath(string filepath, string fileContent,string path)
+        public static void ourPath(string filepath, string fileContent, string path)
         {
-            string[] content=fileContent.Split('\r','\n');
+            string[] content = fileContent.Split('\r', '\n');
             for (int i = 0; i < content.Length; i++)
             {
                 if (content[i].Contains(". \"$ourPath"))
                 {
                     content[i] = path + Trim(content[i].Substring(11), '\"');
-                    content[i]=File.ReadAllText(content[i]);
+                    content[i] = File.ReadAllText(content[i]);
                 }
             }
-                File.WriteAllLines(filepath, content);
+            string[] contentWithOutDuplicate = RemoveComments(content);
+            File.WriteAllLines(filepath, contentWithOutDuplicate);
         }
         public static void scriptPath(string filepath, string fileContent, string path)
         {
@@ -56,11 +62,12 @@ namespace Ps1FilesLibrary
             {
                 if (content[i].Contains(". \"$scriptPath"))
                 {
-                    content[i] = path+Trim(content[i].Substring(content[i].IndexOf('\\')), '\"');
+                    content[i] = path + Trim(content[i].Substring(content[i].IndexOf('\\')), '\"');
                     content[i] = File.ReadAllText(content[i]);
                 }
             }
-            File.WriteAllLines(filepath, content);
+            string[] contentWithOutDuplicate = RemoveComments(content);
+            File.WriteAllLines(filepath, contentWithOutDuplicate);
         }
         public static void LocalScriptPath(string filepath, string fileContent, string path)
         {
@@ -73,7 +80,8 @@ namespace Ps1FilesLibrary
                     content[i] = File.ReadAllText(content[i]);
                 }
             }
-            File.WriteAllLines(filepath, content);
+            string[] contentWithOutDuplicate = RemoveComments(content);
+            File.WriteAllLines(filepath, contentWithOutDuplicate);
         }
         /// <summary>
         /// metoda ne raboti po razlichno ot drugite edinstvenata razlika e che  izpolzva base path a ne patha na papkata
@@ -81,18 +89,23 @@ namespace Ps1FilesLibrary
         /// <param name="filepath"></param> path na file koito izpolzva v momenta
         /// <param name="fileContent"></param> teksta na file koito polzvame
         /// <param name="basePath"></param> tova e glavnia ni path na nashia komp tryabva ni specifichno za rootPath poradi izpozlvaneto na izcyalo druga papka
+        // da vzema 3te koda da vida kakvo e obshtoto v tyah (tova shte e login file) i da go mahan ot 2 i 3tia file i da go ostava samo v 1via i da gi zapisha taka da izpolzvame dictionaryto key pozicia value teksta
         public static void rootPath(string filepath, string fileContent, string basePath)
         {
             string[] content = fileContent.Split('\r', '\n');
+            Dictionary<int, string> keyValuePairs = new Dictionary<int, string>();//key= pozcia v masiva value teksta na file
             for (int i = 0; i < content.Length; i++)
             {
                 if (content[i].Contains(". \"$rootPath"))
                 {
-                    content[i] = basePath + Trim(content[i].Substring(content[i].IndexOf('\\')), '\"');
-                    content[i] = File.ReadAllText(content[i]);
+                    string text = basePath + Trim(content[i].Substring(content[i].IndexOf('\\')), '\"');
+
+                    keyValuePairs.Add(i, text);
                 }
             }
-            File.WriteAllLines(filepath, content);
+
+            string[] contentWithOutDuplicate = RemoveComments(content);
+            File.WriteAllLines(filepath, contentWithOutDuplicate);
         }
         /// <summary>
         /// poneje parent path vzima file po nazad ot segashanta papka prosto mahame edna papka i tova ni e noviat path
@@ -102,7 +115,7 @@ namespace Ps1FilesLibrary
         /// <param name="path"></param> path ot koya papka e file
         public static void parentPath(string filepath, string fileContent, string path)
         {
-            path=path.Substring(0, path.LastIndexOf('\\'));
+            path = path.Substring(0, path.LastIndexOf('\\'));
             string[] content = fileContent.Split('\r', '\n');
             for (int i = 0; i < content.Length; i++)
             {
@@ -112,7 +125,8 @@ namespace Ps1FilesLibrary
                     try
                     {
                         content[i] = File.ReadAllText(content[i]);
-                        File.WriteAllLines(filepath, content);
+                        string[] contentWithOutDuplicate = RemoveComments(content);
+                        File.WriteAllLines(filepath, contentWithOutDuplicate);
                     }
                     catch
                     {
@@ -120,31 +134,56 @@ namespace Ps1FilesLibrary
                     }
                 }
             }
-           
+
         }
-        public  Dictionary<string, List <string>> files= new Dictionary<string,List<string>>();
+        public static void parent(string filepath, string fileContent, string path)
+        {
+            path = path.Substring(0, path.LastIndexOf('\\'));
+            string[] content = fileContent.Split('\r', '\n');
+            for (int i = 0; i < content.Length; i++)
+            {
+                if (content[i].Contains(". \"$parent"))
+                {
+                    content[i] = path + Trim(content[i].Substring(10), '\"');
+                    try
+                    {
+                        content[i] = File.ReadAllText(content[i]);
+                        string[] contentWithOutDuplicate = RemoveComments(content);
+                        File.WriteAllLines(filepath, contentWithOutDuplicate);
+                    }
+                    catch
+                    {
+                        Console.WriteLine($"The following file those not exist: {content[i]} ");
+                    }
+                }
+            }
+
+        }
+        public Dictionary<string, List<string>> files = new Dictionary<string, List<string>>();
         //za . "$ourPath\ primer otvori C:\Users\paco\Desktop\scripts\reefr\Life\LifeFromPreLife
         // za . "$LocalScriptPath otvori  C:\Users\paco\Desktop\scripts\shooger\HotFix
+
+        //ROOTHPAH FIX IDEAS
         // 2 idei za fix
         //1: filovete v common da im se napravi scriptPath na rukaza da moje da ima loop za root>parent>script,our,local
         //2: da se hardcodne po nyakuv nachin da napravi samo i edinstveno na common file script purvo i da si produlji natatuk normalno
         //3(random):da prekrusta papkata taka che da  e purva i taka shte izpozlva podredbata si normalno MAI NE E SIGORNO
-        public string[] array = { "\"$rootPath\\", "\"$parentPath\\",, "\"$scriptPath\\",  "\"$ourPath\\", "\"$LocalScriptPath\\" };
-        public void successorRowSearcher(List<string> folderContent,string basePath)
+        //4: poneje i 3te common file nasledyavat login v novata papka variables osven globalnite promenlivi shte se nasledyava i login(kod i shte se premahne poneje shte go iam  3 puti) 
+        //5; mojebi nai dobra da naprava dictonary koeto ima key= koe tryabva da se smeni(parent,rooth ect...) i value=path na file
+        public string[] array = { "\"$rootPath\\", "\"$parentPath\\", "\"$parent\\" ,"\"$scriptPath\\", "\"$ourPath\\", "\"$LocalScriptPath\\" };
+        // C:\Users\paco\Desktop\scripts\shooger  i C:\Users\paco\Desktop\scripts\uncut  i C:\Users\paco\Desktop\scripts\usdirectory
+        // e mazalo(sushtia problem s rooth path ma za parent path(svurzano e s script path) ) ne raboti i za variables metoda
+        public void successorRowSearcher(List<string> folderContent, string basePath)
         {
-            List<string> list = new List<string>();// list is used to caontains wich paths are used in array
             foreach (string path in folderContent)//path na vseki folder
             {
-                list.Clear();
-                foreach (string filepath in Directory.GetFiles(path, "*.ps1"))// vsichki file-ve na vseki folder
+                for (int i = 0; i < array.Length; i++)//proveryava prez glavnite path funkcii vseki file koe sudurja 
                 {
-                    string fileContent = File.ReadAllText(filepath);
-
-                    for (int i = 0; i < array.Length; i++)//proveryava prez glavnite path funkcii vseki file koe sudurja 
+                    foreach (string filepath in Directory.GetFiles(path, "*.ps1"))// vsichki file-ve na vseki folder
                     {
+                        string fileContent = File.ReadAllText(filepath);
                         if (fileContent.Contains(array[i]) == true)
                         {
-                            Console.WriteLine(array[i]);
                             switch (array[i])
                             {
                                 case "\"$parentPath\\":
@@ -155,10 +194,10 @@ namespace Ps1FilesLibrary
                                     fileContent = fileContent.Replace("$scriptPath  = (Get-Item $PSScriptRoot).FullName", null);
                                     scriptPath(filepath, fileContent, path);
                                     break;
-                                case "\"$rootPath\\":
-                                    fileContent = fileContent.Replace("$rootPath  = (Get-Item $PSScriptRoot).Parent.FullName", null);
-                                    rootPath(filepath, fileContent, basePath);
-                                    break;
+                                //case "\"$rootPath\\"://roothpath does not work
+                                //    fileContent = fileContent.Replace("$rootPath  = (Get-Item $PSScriptRoot).Parent.FullName", null);
+                                //    rootPath(filepath, fileContent, basePath);
+                                //break;
                                 case "\"$ourPath\\":
                                     fileContent = fileContent.Replace("$ourPath =  (Get-Item $PSScriptRoot).FullName", null);
                                     ourPath(filepath, fileContent, path);
@@ -167,104 +206,72 @@ namespace Ps1FilesLibrary
                                     fileContent = fileContent.Replace("$LocalScriptPath  = (Get-Item $PSScriptRoot).FullName", null);
                                     LocalScriptPath(filepath, fileContent, path);
                                     break;
+                                case "\"$parent\\":
+                                    fileContent = fileContent.Replace("$parent =  (Get-Item $PSScriptRoot).Parent.FullName", null);
+                                    parent(filepath, fileContent, path);
+                                    break;
+
                             }
                         }
+
                     }
                 }
             }
         }
-    }
-
-    // add new files for common virablees in every folder
-    /*
-    public void commonVariables(Dictionary<string, List<string>> folderContent)
-    {
-        Dictionary<string, int> keyValuePairs = new Dictionary<string, int>();
-        foreach (KeyValuePair<string, List<string>> file in folderContent)
+        // add new files for common virablees in every folder
+        public void commonVariables(List<string> foldercontent)
         {
-            foreach (string path in file.Value)
+            foreach (string path in foldercontent)
             {
-                //function to find which rows are variables
-                int i = 0;
-                foreach (string filepath in Directory.GetFiles(path, "*.ps1"))
+                List<string> valuesOfVariables = new List<string>();// list koito zapazva vsichki promenlivi, shte izpolzvame lista da ppreglejdame v vseki file i da gi mahame neshtata koit osa v nego
+                Dictionary<string, int> keyValuePairs = new Dictionary<string, int>();// key= promenlivata koyato sme namerili value= kolko purti se poftarya
+                int i = 0;//sledi kolko file ps1 sa v papkata
+                foreach (string filepath in Directory.GetFiles(path, "*.ps1"))// vsichki file-ve na vseki folder
                 {
                     i++;
-                    string[] readText = File.ReadAllLines(filepath);
-                    foreach (string s in readText)
+                    string[] content=File.ReadAllLines(filepath);
+                    foreach(string line in content)
                     {
-                        if (s.Contains("$Global:") == true && (s[0] == '#' || s[0] == '$') && s[1] >= 33)
+                        if (line.Contains("$Global:") == true)//proveryava za global promenlivi
                         {
-                            try
+                            try//opitva da dobavi promenlivata i ako veche ya ima uvelichava value s 1( ako nakraya value =i tova oznachava che go iam v vseki file i shte se dobavi v novia file)
                             {
-                                keyValuePairs.Add(s, 1);
+                                keyValuePairs.Add(line, 1);
                             }
                             catch
                             {
-                                keyValuePairs[s]++;
+                                keyValuePairs[line]++;
                             }
                         }
                     }
                 }
-                //adding variables used in every files in selected folder
-                using (StreamWriter write = new StreamWriter(Path.Combine(path + "\\Variables.ps1")))
+                if (i > 1)//ako ima poveche ot 1 file samo togava da suzdade variables 
                 {
-                    foreach (var item in keyValuePairs)
+                    using (StreamWriter sw = new StreamWriter(path + "\\Variables.ps1"))
                     {
-                        if (item.Value == i)
+                        foreach (var item in keyValuePairs)
                         {
-                            write.WriteLine(item.Key);
+                            if (item.Value == i)
+                            {
+                                sw.WriteLine(item.Key);
+                                valuesOfVariables.Add(item.Key);
+                            }
                         }
                     }
                 }
-
-                keyValuePairs.Clear();
-
                 //adding extend row for  every file for variables.ps1
-                foreach (string filePath in Directory.GetFiles(path, "*.ps1"))
+                foreach (string filepath in Directory.GetFiles(path, "*.ps1"))// vsichki file-ve na vseki folder
                 {
-                    if (filePath.Substring(path.Length) != "\\Variables.ps1" && new FileInfo(Path.Combine(path, "Variables.ps1")).Length != 0)
-                    {
-                        string[] lines = File.ReadAllLines(filePath)
-                            .Where(line => !string.IsNullOrWhiteSpace(line) && !line.TrimStart().StartsWith("#"))
-                            .ToArray();
-
-                        string scriptPathLine = "$scriptPath  = (Get-Item $PSScriptRoot).FullName";
-                        string variablesLine = ". \"$scriptPath\\Variables.ps1\"";
-                        List<string> updatedLines = new List<string> { scriptPathLine, variablesLine };
-                        updatedLines.AddRange(lines);
-
-                        File.WriteAllLines(filePath, updatedLines);
-                    }
-                    else
-                    {
-                        string[] lines = File.ReadAllLines(filePath).Where(line => !string.IsNullOrWhiteSpace(line) && !line.TrimStart().StartsWith("#")).ToArray();
-                        File.WriteAllLines(filePath, lines);
-                    }
-                }
-                // remove used viruables in other files
-                foreach (string filePath in Directory.GetFiles(path, "*.ps1"))
-                {
-                    if (filePath.Substring(path.Length) != "\\Variables.ps1")
-                    {
-                        string[] lines = File.ReadAllLines(Path.Combine(path + "\\Variables.ps1"));
-                        string[] linesToKeep = File.ReadLines(filePath).ToArray();
-                        for (int j = 0; j < lines.Length; j++)
+                    if (filepath!= path + "\\Variables.ps1") {
+                        string[] conten = File.ReadAllLines(filepath);
+                        foreach (string item in valuesOfVariables)// vsichki promenlivi koito tryabva da se mahnat
                         {
-                            linesToKeep = linesToKeep.Where(line => line != lines[j]).ToArray();
+                            conten = conten.Where(s => s != item).ToArray();
                         }
-                        File.WriteAllLines(filePath, linesToKeep);
+                        File.WriteAllLines(filepath, conten);
                     }
                 }
-                //deleting empty variables.ps1 files
-                foreach (string filePath in Directory.GetFiles(path, "Variables.ps1"))
-                {
-                    if (new FileInfo(filePath).Length == 0)
-                    {
-                        File.Delete(filePath);
-                    }
-                }
-            }
+            }  
         }
-    }*/
-
+    }
 }
