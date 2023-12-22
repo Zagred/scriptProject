@@ -10,12 +10,6 @@ namespace Ps1FilesLibrary
 {
     public class Ps1Files
     {
-        /*
-         todo:
-        1.da mina prez vsichki failove i da vida koi afailove tryabva da se mahant i da sa v otdelni funkcii ROOTHPATH. SCRIPTPATH, PARENTPATH, LOCALSCRIPPATH,("$ourPath "$parent?)(done)
-        2.da zameni kodovete kato glodea po vajnost PURVO ROOTHPATH,PARENTPATH,SCRIPPATH,LOCALSCRIPTPATH(done BEZ ROOTH PATH)
-        3.da se suzdade file  za vseki foulder kudeto subira vsichki GLOBAL  promenlivi i da se nasledyava ot vseki drug file s SCRIPTPATH(done no bez posochenite pathove)
-         */
         public static string Trim(string str, char trimChar)
         {
             string result = string.Empty;
@@ -30,8 +24,6 @@ namespace Ps1FilesLibrary
         }
         public static string[] RemoveComments(string[] content)
         {
-             //string indexToRemove = "#";
-             //content=content.Where(x => x.Contains(indexToRemove)==false).ToArray();//maha vseki red koito sudurja #
             content = content.Where(arg => !string.IsNullOrWhiteSpace(arg)).ToArray();//maha vseki red koito ne sudurja nishto
             return content;
         }
@@ -80,30 +72,6 @@ namespace Ps1FilesLibrary
                     content[i] = File.ReadAllText(content[i]);
                 }
             }
-            string[] contentWithOutDuplicate = RemoveComments(content);
-            File.WriteAllLines(filepath, contentWithOutDuplicate);
-        }
-        /// <summary>
-        /// metoda ne raboti po razlichno ot drugite edinstvenata razlika e che  izpolzva base path a ne patha na papkata
-        /// </summary>
-        /// <param name="filepath"></param> path na file koito izpolzva v momenta
-        /// <param name="fileContent"></param> teksta na file koito polzvame
-        /// <param name="basePath"></param> tova e glavnia ni path na nashia komp tryabva ni specifichno za rootPath poradi izpozlvaneto na izcyalo druga papka
-        // da vzema 3te koda da vida kakvo e obshtoto v tyah (tova shte e login file) i da go mahan ot 2 i 3tia file i da go ostava samo v 1via i da gi zapisha taka da izpolzvame dictionaryto key pozicia value teksta
-        public static void rootPath(string filepath, string fileContent, string basePath)
-        {
-            string[] content = fileContent.Split('\r', '\n');
-            Dictionary<int, string> keyValuePairs = new Dictionary<int, string>();//key= pozcia v masiva value teksta na file
-            for (int i = 0; i < content.Length; i++)
-            {
-                if (content[i].Contains(". \"$rootPath"))
-                {
-                    string text = basePath + Trim(content[i].Substring(content[i].IndexOf('\\')), '\"');
-
-                    keyValuePairs.Add(i, text);
-                }
-            }
-
             string[] contentWithOutDuplicate = RemoveComments(content);
             File.WriteAllLines(filepath, contentWithOutDuplicate);
         }
@@ -159,20 +127,85 @@ namespace Ps1FilesLibrary
             }
 
         }
-        public Dictionary<string, List<string>> files = new Dictionary<string, List<string>>();
-        //za . "$ourPath\ primer otvori C:\Users\paco\Desktop\scripts\reefr\Life\LifeFromPreLife
-        // za . "$LocalScriptPath otvori  C:\Users\paco\Desktop\scripts\shooger\HotFix
+        /// <summary>
+        /// metoda ne raboti po razlichno ot drugite edinstvenata razlika e che  izpolzva base path a ne patha na papkata
+        /// </summary>
+        /// <param name="filepath"></param> path na file koito izpolzva v momenta
+        /// <param name="fileContent"></param> teksta na file koito polzvame
+        /// <param name="basePath"></param> tova e glavnia ni path na nashia komp tryabva ni specifichno za rootPath poradi izpozlvaneto na izcyalo druga papka
+        public static void rootPath(string filepath, string fileContent, string basePath)
+        {
+            string[] content = fileContent.Split('\r', '\n');
+            List<string> roothPathPaths = new List<string>();
+            for (int i = 0; i < content.Length; i++)
+            {
+                if (content[i].Contains(". \"$rootPath"))
+                {
+                    string path = basePath + Trim(content[i].Replace(". \"$rootPath\\", null), '\"');// da nameri ot koya papka e roothpath (v sluchyaa common papkata i file)
+                    roothPathPaths.Add(path);
+                }
+            }
+            roothScriptPath(roothPathPaths,filepath, content,basePath);
+        }
+        /// <summary>
+        /// zamesta roothPathovete(te viangi sa ot 1 -3 ) i ponjee vsichki imat scriptpath kum login pravim taka che samo purviat da nasledyava login file 
+        /// </summary>
+        /// <param name="roothPathPaths"></param> list s vsichki rooth pathove koito se izpolzvat
+        /// <param name="filepath"></param>path na file koito izpolzva v momenta
+        /// <param name="content"></param> teksta koito shte dobavim na file
+        /// <param name="basePath"></param> tova e glavnia ni path na nashia komp tryabva ni specifichno za rootPath poradi izpozlvaneto na izcyalo druga papka
+        public static void roothScriptPath(List<string> roothPathPaths, string filepath, string[] content, string basePath)
+        {
+            string combineText = "";//poneje content e array i nie zamenyame array-a saamo 1 red s vsichkite roothpaths izpozlvame edin string koito gi obediniyava
+            int i = 0;
+            foreach (string path in roothPathPaths)
+            {
+                if (i == 0)//tova shte e purviat roothpath taka che pri nego ne mahame loggin reda
+                {
+                    combineText = File.ReadAllText(path).Replace("$scriptPath  = (Get-Item $PSScriptRoot).FullName", null);
+                    i++;
+                }
+                else// vseki drug shte mahnem i dvata reda za scripth path poneje ne ni tryabvat
+                {
+                    string text = File.ReadAllText(path).Replace("$scriptPath  = (Get-Item $PSScriptRoot).FullName", null).Replace(". \"$scriptPath\\Logging.ps1\"", null);
+                    combineText += text;
+                }
+            }
 
-        //ROOTHPAH FIX IDEAS
-        // 2 idei za fix
-        //1: filovete v common da im se napravi scriptPath na rukaza da moje da ima loop za root>parent>script,our,local
-        //2: da se hardcodne po nyakuv nachin da napravi samo i edinstveno na common file script purvo i da si produlji natatuk normalno
-        //3(random):da prekrusta papkata taka che da  e purva i taka shte izpozlva podredbata si normalno MAI NE E SIGORNO
-        //4: poneje i 3te common file nasledyavat login v novata papka variables osven globalnite promenlivi shte se nasledyava i login(kod i shte se premahne poneje shte go iam  3 puti) 
-        //5; mojebi nai dobra da naprava dictonary koeto ima key= koe tryabva da se smeni(parent,rooth ect...) i value=path na file
+            for (int j = 0; j < content.Length; j++)// ot content maha vsichki rooth patove osven 1 koito shte sudurja scriptpath
+            {
+                if (content[j].Contains(". \"$rootPath") && i == 1)
+                {
+                    content[j] = combineText;
+                    i++;
+                }
+                else if (content[j].Contains(". \"$rootPath") && i != 1)
+                {
+                    content[j] = null;
+                }
+            }
+            basePath = basePath + "common\\Logging.ps1";
+            for ( int k = 0; k < content.Length; k++)// funkcia za script path
+            {
+                if (content[k] != null)
+                {
+                    if (content[k].Contains(". \"$scriptPath"))
+                    {
+                        content[k] = content[k].Replace(". \"$scriptPath\\Logging.ps1\"", File.ReadAllText(basePath));
+                    }
+                }
+
+            }
+            string[] contentWithOutDuplicate = RemoveComments(content);
+            File.WriteAllLines(filepath, contentWithOutDuplicate);
+        }
         public string[] array = { "\"$rootPath\\", "\"$parentPath\\", "\"$parent\\" ,"\"$scriptPath\\", "\"$ourPath\\", "\"$LocalScriptPath\\" };
         // C:\Users\paco\Desktop\scripts\shooger  i C:\Users\paco\Desktop\scripts\uncut  i C:\Users\paco\Desktop\scripts\usdirectory
         // e mazalo(sushtia problem s rooth path ma za parent path(svurzano e s script path) ) ne raboti i za variables metoda
+        //localscript path tryabva da se napravi s logika na  roothpath
+
+        //ZA RESHENIE V SCHEDULEtASK, WEBSERVICE I WINDOWSERVICE SE MAHAT REDOVETE ZA ROOTHPATH
+        // poneje te nasledyavat cherz scriptpath drug ifle koito sudurja roothpath kum sushtie elementi
         public void successorRowSearcher(List<string> folderContent, string basePath)
         {
             foreach (string path in folderContent)//path na vseki folder
@@ -194,23 +227,22 @@ namespace Ps1FilesLibrary
                                     fileContent = fileContent.Replace("$scriptPath  = (Get-Item $PSScriptRoot).FullName", null);
                                     scriptPath(filepath, fileContent, path);
                                     break;
-                                //case "\"$rootPath\\"://roothpath does not work
-                                //    fileContent = fileContent.Replace("$rootPath  = (Get-Item $PSScriptRoot).Parent.FullName", null);
-                                //    rootPath(filepath, fileContent, basePath);
-                                //break;
                                 case "\"$ourPath\\":
                                     fileContent = fileContent.Replace("$ourPath =  (Get-Item $PSScriptRoot).FullName", null);
                                     ourPath(filepath, fileContent, path);
                                     break;
-                                case "\"$LocalScriptPath\\":
-                                    fileContent = fileContent.Replace("$LocalScriptPath  = (Get-Item $PSScriptRoot).FullName", null);
-                                    LocalScriptPath(filepath, fileContent, path);
-                                    break;
+                                //case "\"$LocalScriptPath\\":
+                                //    fileContent = fileContent.Replace("$LocalScriptPath  = (Get-Item $PSScriptRoot).FullName", null);
+                                //    LocalScriptPath(filepath, fileContent, path);
+                                //    break;
                                 case "\"$parent\\":
                                     fileContent = fileContent.Replace("$parent =  (Get-Item $PSScriptRoot).Parent.FullName", null);
                                     parent(filepath, fileContent, path);
                                     break;
-
+                                //case "\"$rootPath\\"://raboti no slaga tolkova mnogo tekst che filovete ne se chetat
+                                //    fileContent = fileContent.Replace("$rootPath  = (Get-Item $PSScriptRoot).Parent.FullName", null);
+                                //    rootPath(filepath, fileContent, basePath);
+                                //    break;
                             }
                         }
 
@@ -268,7 +300,18 @@ namespace Ps1FilesLibrary
                         {
                             conten = conten.Where(s => s != item).ToArray();
                         }
+
                         File.WriteAllLines(filepath, conten);
+                    }
+                }
+                foreach (string filepath in Directory.GetFiles(path, "*.ps1"))// vsichki file-ve na vseki folder
+                {
+                    if (filepath != path + "\\Variables.ps1")
+                    {
+                        string conten = File.ReadAllText(filepath);
+                        conten = "$scriptPath  = (Get-Item $PSScriptRoot).FullName \r\n" + ". \"$scriptPath\\Variables.ps1\"\" \r\n" + conten;
+
+                        File.WriteAllText(filepath, conten);
                     }
                 }
             }  
