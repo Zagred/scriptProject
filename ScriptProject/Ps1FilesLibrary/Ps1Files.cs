@@ -28,7 +28,7 @@ namespace Ps1FilesLibrary
             return content;
         }
         /// <summary>
-        /// 3-te metoda rabotat kato izpolzvam fileContent da mahant nasledyavashtite redove i da trimne file-a koito nasledya i go obedinayva s path i go dobavya v folecontet i go zapisva kato nov file
+        /// 2-te metoda rabotat kato izpolzvam fileContent da mahant nasledyavashtite redove i da trimne file-a koito nasledya i go obedinayva s path i go dobavya v folecontet i go zapisva kato nov file
         /// </summary>
         /// <param name="filepath"></param> path na file koito izpolzva v momenta
         /// <param name="fileContent"></param> teksta na file koito polzvame
@@ -53,20 +53,6 @@ namespace Ps1FilesLibrary
             for (int i = 0; i < content.Length; i++)
             {
                 if (content[i].Contains(". \"$scriptPath"))
-                {
-                    content[i] = path + Trim(content[i].Substring(content[i].IndexOf('\\')), '\"');
-                    content[i] = File.ReadAllText(content[i]);
-                }
-            }
-            string[] contentWithOutDuplicate = RemoveComments(content);
-            File.WriteAllLines(filepath, contentWithOutDuplicate);
-        }
-        public static void LocalScriptPath(string filepath, string fileContent, string path)
-        {
-            string[] content = fileContent.Split('\r', '\n');
-            for (int i = 0; i < content.Length; i++)
-            {
-                if (content[i].Contains(". \"$LocalScriptPath"))
                 {
                     content[i] = path + Trim(content[i].Substring(content[i].IndexOf('\\')), '\"');
                     content[i] = File.ReadAllText(content[i]);
@@ -199,10 +185,80 @@ namespace Ps1FilesLibrary
             string[] contentWithOutDuplicate = RemoveComments(content);
             File.WriteAllLines(filepath, contentWithOutDuplicate);
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="filepath"></param> path na file koito izpolzva v momenta
+        /// <param name="fileContent"></param> teksta na file koito polzvame
+        /// <param name="path"></param> path ot koya papka e file
+        public static void LocalScript(string filepath, string fileContent, string path)
+        {
+            string[] content = fileContent.Split('\r', '\n');
+            List<string> localPathPaths = new List<string>();//vsichko filove koito imat localscriptpath
+            for (int i = 0; i < content.Length; i++)
+            {
+                if (content[i].Contains(". \"$LocalScriptPath"))
+                {
+                    string basePath= path + Trim(content[i].Substring(content[i].IndexOf('\\')), '\"');
+                    localPathPaths.Add(basePath);
+                }
+            }
+            localScripPath(localPathPaths, filepath, content, path);
+        }
+        /// <summary>
+        /// preglejda vsichkite filove s scriptpath ot papkata i premaha scriptpath redovete i zamesta vseki uniqe scriptpath  s teksta koito tryabva(v sluchaya e samo common variables)
+        /// </summary>
+        /// <param name="localPathPaths"></param> vsichki putishta koito se izpolzvat
+        /// <param name="filepath"></param>path na file koito izpolzva v momenta
+        /// <param name="content"></param>teksta na file koito polzvame
+        /// <param name="path"></param>path ot koya papka e file
+        public static void localScripPath(List<string> localPathPaths, string filepath, string[] content, string path)
+        {
+            string combineText = "";
+            int i = 0;
+
+            foreach (string line in localPathPaths)
+            {
+                if (i == 0)
+                {
+                    combineText += File.ReadAllText(line).Replace("$scriptPath  = (Get-Item $PSScriptRoot).FullName", null);
+                    i++;
+                }
+                else
+                {              
+                    string text = File.ReadAllText(line).Replace("$scriptPath  = (Get-Item $PSScriptRoot).FullName", null).Replace(". \"$scriptPath\\CommonVariables.ps1\"", null);
+                    combineText += text;
+                }
+            }
+
+            for (int j=0; j < content.Length; j++)
+            {
+                if (content[j].Contains(". \"$LocalScriptPath") && i==1)
+                {
+                    content[j] = combineText;
+                    i++;
+                }
+                else if(content[j].Contains(". \"$LocalScriptPath") && i != 1)
+                {
+                    content[j] = null;
+                }
+            }
+            string basePath = path + "\\CommonVariables.ps1";
+            for (int k = 0; k < content.Length; k++)// funkcia za script path
+            {
+                if (content[k] != null)
+                {
+                    if (content[k].Contains(". \"$scriptPath"))
+                    {
+                        content[k] = content[k].Replace(". \"$scriptPath\\CommonVariables.ps1\"", File.ReadAllText(basePath));
+                    }
+                }
+
+            }
+            string[] contentWithOutDuplicate = RemoveComments(content);
+            File.WriteAllLines(filepath, contentWithOutDuplicate);
+        }
         public string[] array = { "\"$rootPath\\", "\"$parentPath\\", "\"$parent\\" ,"\"$scriptPath\\", "\"$ourPath\\", "\"$LocalScriptPath\\" };
-        // C:\Users\paco\Desktop\scripts\shooger  i C:\Users\paco\Desktop\scripts\uncut  i C:\Users\paco\Desktop\scripts\usdirectory
-        // e mazalo(sushtia problem s rooth path ma za parent path(svurzano e s script path) ) ne raboti i za variables metoda
-        //localscript path tryabva da se napravi s logika na  roothpath
 
         //ZA RESHENIE V SCHEDULEtASK, WEBSERVICE I WINDOWSERVICE SE MAHAT REDOVETE ZA ROOTHPATH
         // poneje te nasledyavat cherz scriptpath drug ifle koito sudurja roothpath kum sushtie elementi
@@ -231,18 +287,18 @@ namespace Ps1FilesLibrary
                                     fileContent = fileContent.Replace("$ourPath =  (Get-Item $PSScriptRoot).FullName", null);
                                     ourPath(filepath, fileContent, path);
                                     break;
-                                //case "\"$LocalScriptPath\\":
-                                //    fileContent = fileContent.Replace("$LocalScriptPath  = (Get-Item $PSScriptRoot).FullName", null);
-                                //    LocalScriptPath(filepath, fileContent, path);
-                                //    break;
+                                case "\"$LocalScriptPath\\":
+                                    fileContent = fileContent.Replace("$LocalScriptPath  = (Get-Item $PSScriptRoot).FullName", null);
+                                    LocalScript(filepath, fileContent, path);
+                                    break;
                                 case "\"$parent\\":
                                     fileContent = fileContent.Replace("$parent =  (Get-Item $PSScriptRoot).Parent.FullName", null);
                                     parent(filepath, fileContent, path);
                                     break;
-                                //case "\"$rootPath\\"://raboti no slaga tolkova mnogo tekst che filovete ne se chetat
-                                //    fileContent = fileContent.Replace("$rootPath  = (Get-Item $PSScriptRoot).Parent.FullName", null);
-                                //    rootPath(filepath, fileContent, basePath);
-                                //    break;
+                                    //case "\"$rootPath\\"://raboti no slaga tolkova mnogo tekst che filovete ne se chetat
+                                    //    fileContent = fileContent.Replace("$rootPath  = (Get-Item $PSScriptRoot).Parent.FullName", null);
+                                    //    rootPath(filepath, fileContent, basePath);
+                                    //    break;
                             }
                         }
 
