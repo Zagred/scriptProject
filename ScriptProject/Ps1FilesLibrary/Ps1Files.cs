@@ -22,17 +22,24 @@ namespace Ps1FilesLibrary
             }
             return result;
         }
-        public static string[] RemoveComments(string[] content)
+        public void RemoveEmptyRows(List<string> folderContent)
         {
-            content = content.Where(arg => !string.IsNullOrWhiteSpace(arg)).ToArray();//maha vseki red koito ne sudurja nishto
-            return content;
+            foreach (string path in folderContent)//path на всяка папка
+            {
+                foreach (string filepath in Directory.GetFiles(path, "*.ps1"))// всчики файлове в папката
+                {
+                    string[] fileContent = File.ReadAllLines(filepath);
+                    fileContent = fileContent.Where(arg => !string.IsNullOrWhiteSpace(arg)).ToArray();//маха всеки ред който не съдържа нищп
+                    File.WriteAllLines(filepath, fileContent);
+                }
+            }
         }
         /// <summary>
-        /// 2-te metoda rabotat kato izpolzvam fileContent da mahant nasledyavashtite redove i da trimne file-a koito nasledya i go obedinayva s path i go dobavya v folecontet i go zapisva kato nov file
+        /// 2-та метода работят като използваме fileContent, за да намери реда с който трябва да заместим кода, маха ме го и на негово място слагам кода който иска
         /// </summary>
-        /// <param name="filepath"></param> path na file koito izpolzva v momenta
-        /// <param name="fileContent"></param> teksta na file koito polzvame
-        /// <param name="path"></param> path ot koya papka e file
+        /// <param name="filepath"></param> path на файл, който използваме в момента
+        /// <param name="fileContent"></param> текста на файла, който използваме
+        /// <param name="path"></param> path от коя папка е файла
         public static void ourPath(string filepath, string fileContent, string path)
         {
             string[] content = fileContent.Split('\r', '\n');
@@ -44,8 +51,7 @@ namespace Ps1FilesLibrary
                     content[i] = File.ReadAllText(content[i]);
                 }
             }
-            string[] contentWithOutDuplicate = RemoveComments(content);
-            File.WriteAllLines(filepath, contentWithOutDuplicate);
+            File.WriteAllLines(filepath, content);
         }
         public static void scriptPath(string filepath, string fileContent, string path)
         {
@@ -58,15 +64,14 @@ namespace Ps1FilesLibrary
                     content[i] = File.ReadAllText(content[i]);
                 }
             }
-            string[] contentWithOutDuplicate = RemoveComments(content);
-            File.WriteAllLines(filepath, contentWithOutDuplicate);
+            File.WriteAllLines(filepath, content);
         }
         /// <summary>
-        /// poneje parent path vzima file po nazad ot segashanta papka prosto mahame edna papka i tova ni e noviat path
+        /// логиакта е подобна на другите, но разликата е цхе parent path наследява една папка по назад, следователно ще взимам от предишната папка а не настоящата
         /// </summary>
-        /// <param name="filepath"></param> path na file koito izpolzva v momenta
-        /// <param name="fileContent"></param> teksta na file koito polzvame
-        /// <param name="path"></param> path ot koya papka e file
+        /// <param name="filepath"></param> path на файла, който използваме в момента
+        /// <param name="fileContent"></param> текста на файла, който използваме
+        /// <param name="path"></param> path на папката на файла
         public static void parentPath(string filepath, string fileContent, string path)
         {
             path = path.Substring(0, path.LastIndexOf('\\'));
@@ -76,11 +81,10 @@ namespace Ps1FilesLibrary
                 if (content[i].Contains(". \"$parentPath"))
                 {
                     content[i] = path + Trim(content[i].Substring(14), '\"');
-                    try
+                    try// слагаме try catch фунцкия, защото в един от файловете се иска файл, който не съществува
                     {
                         content[i] = File.ReadAllText(content[i]);
-                        string[] contentWithOutDuplicate = RemoveComments(content);
-                        File.WriteAllLines(filepath, contentWithOutDuplicate);
+                        File.WriteAllLines(filepath, content);
                     }
                     catch
                     {
@@ -102,8 +106,7 @@ namespace Ps1FilesLibrary
                     try
                     {
                         content[i] = File.ReadAllText(content[i]);
-                        string[] contentWithOutDuplicate = RemoveComments(content);
-                        File.WriteAllLines(filepath, contentWithOutDuplicate);
+                        File.WriteAllLines(filepath, content);
                     }
                     catch
                     {
@@ -114,11 +117,11 @@ namespace Ps1FilesLibrary
 
         }
         /// <summary>
-        /// metoda ne raboti po razlichno ot drugite edinstvenata razlika e che  izpolzva base path a ne patha na papkata
+        /// разлиакта с другите е че има фиксиран path, от който трябва да гледаме файлове
         /// </summary>
-        /// <param name="filepath"></param> path na file koito izpolzva v momenta
-        /// <param name="fileContent"></param> teksta na file koito polzvame
-        /// <param name="basePath"></param> tova e glavnia ni path na nashia komp tryabva ni specifichno za rootPath poradi izpozlvaneto na izcyalo druga papka
+        /// <param name="filepath"></param> path на файла който използваме в момента
+        /// <param name="fileContent"></param> teksta на файл, който използваме
+        /// <param name="basePath"></param> това е главния path трябва ни специфично за roothPath, защото ще използваме изцяло друга папка
         public static void rootPath(string filepath, string fileContent, string basePath)
         {
             string[] content = fileContent.Split('\r', '\n');
@@ -127,38 +130,38 @@ namespace Ps1FilesLibrary
             {
                 if (content[i].Contains(". \"$rootPath"))
                 {
-                    string path = basePath + Trim(content[i].Replace(". \"$rootPath\\", null), '\"');// da nameri ot koya papka e roothpath (v sluchyaa common papkata i file)
+                    string path = basePath + Trim(content[i].Replace(". \"$rootPath\\", null), '\"');// да намери от коя папка  roothpath
                     roothPathPaths.Add(path);
                 }
             }
-            roothScriptPath(roothPathPaths,filepath, content,basePath);
+            roothScriptPath(roothPathPaths, filepath, content, basePath);
         }
         /// <summary>
-        /// zamesta roothPathovete(te viangi sa ot 1 -3 ) i ponjee vsichki imat scriptpath kum login pravim taka che samo purviat da nasledyava login file 
+        /// замества roothPath(те винаги са от 1-3) и понеже всички имат scriptPath към Login програмата ще наследи само първият а на другите ще махне реда
         /// </summary>
-        /// <param name="roothPathPaths"></param> list s vsichki rooth pathove koito se izpolzvat
-        /// <param name="filepath"></param>path na file koito izpolzva v momenta
-        /// <param name="content"></param> teksta koito shte dobavim na file
-        /// <param name="basePath"></param> tova e glavnia ni path na nashia komp tryabva ni specifichno za rootPath poradi izpozlvaneto na izcyalo druga papka
+        /// <param name="roothPathPaths"></param> лист на всички roothPath, които се използват
+        /// <param name="filepath"></param>path на файл, който използваме в момента
+        /// <param name="content"></param> текста, който ще добавим
+        /// <param name="basePath"></param> това е главния path трябва ни специфично за roothPath, защото ще използваме изцяло друга папка
         public static void roothScriptPath(List<string> roothPathPaths, string filepath, string[] content, string basePath)
         {
-            string combineText = "";//poneje content e array i nie zamenyame array-a saamo 1 red s vsichkite roothpaths izpozlvame edin string koito gi obediniyava
+            string combineText = "";//ще заменяме определна част от стринга и ще стане по бързо да се прави със стринг околкото с масив
             int i = 0;
             foreach (string path in roothPathPaths)
             {
-                if (i == 0)//tova shte e purviat roothpath taka che pri nego ne mahame loggin reda
+                if (i == 0)//първи roothpath при него махаме само loggin реда 
                 {
                     combineText = File.ReadAllText(path).Replace("$scriptPath  = (Get-Item $PSScriptRoot).FullName", null);
                     i++;
                 }
-                else// vseki drug shte mahnem i dvata reda za scripth path poneje ne ni tryabvat
+                else// всеки друг се махат и двата реда
                 {
                     string text = File.ReadAllText(path).Replace("$scriptPath  = (Get-Item $PSScriptRoot).FullName", null).Replace(". \"$scriptPath\\Logging.ps1\"", null);
                     combineText += text;
                 }
             }
 
-            for (int j = 0; j < content.Length; j++)// ot content maha vsichki rooth patove osven 1 koito shte sudurja scriptpath
+            for (int j = 0; j < content.Length; j++)// от content маха всички roothpatov освен 1 който съдържа  scriptpath
             {
                 if (content[j].Contains(". \"$rootPath") && i == 1)
                 {
@@ -171,7 +174,7 @@ namespace Ps1FilesLibrary
                 }
             }
             basePath = basePath + "common\\Logging.ps1";
-            for ( int k = 0; k < content.Length; k++)// funkcia za script path
+            for (int k = 0; k < content.Length; k++)// функция за scriptpath
             {
                 if (content[k] != null)
                 {
@@ -182,36 +185,35 @@ namespace Ps1FilesLibrary
                 }
 
             }
-            string[] contentWithOutDuplicate = RemoveComments(content);
-            File.WriteAllLines(filepath, contentWithOutDuplicate);
+            File.WriteAllLines(filepath, content);
         }
         /// <summary>
-        /// 
+        /// разлиаката му с другите методи е следната: има същатата функция като scriptPath, но има порблема на roothPath(повтаря се и редове се дублират)
         /// </summary>
-        /// <param name="filepath"></param> path na file koito izpolzva v momenta
-        /// <param name="fileContent"></param> teksta na file koito polzvame
-        /// <param name="path"></param> path ot koya papka e file
+        /// <param name="filepath"></param> path на файла, който използваме в момента
+        /// <param name="fileContent"></param> текста на файла, който използваме
+        /// <param name="path"></param> path от коя папка е файла
         public static void LocalScript(string filepath, string fileContent, string path)
         {
             string[] content = fileContent.Split('\r', '\n');
-            List<string> localPathPaths = new List<string>();//vsichko filove koito imat localscriptpath
+            List<string> localPathPaths = new List<string>();//всички файлове, които иамт  localscriptpath
             for (int i = 0; i < content.Length; i++)
             {
                 if (content[i].Contains(". \"$LocalScriptPath"))
                 {
-                    string basePath= path + Trim(content[i].Substring(content[i].IndexOf('\\')), '\"');
+                    string basePath = path + Trim(content[i].Substring(content[i].IndexOf('\\')), '\"');
                     localPathPaths.Add(basePath);
                 }
             }
             localScripPath(localPathPaths, filepath, content, path);
         }
         /// <summary>
-        /// preglejda vsichkite filove s scriptpath ot papkata i premaha scriptpath redovete i zamesta vseki uniqe scriptpath  s teksta koito tryabva(v sluchaya e samo common variables)
+        /// преглежда всичките файлове с scriptpath от папкта и премахва scriptpath редовете и земста всеки uniqe scriptpath с текста, който трябва
         /// </summary>
-        /// <param name="localPathPaths"></param> vsichki putishta koito se izpolzvat
-        /// <param name="filepath"></param>path na file koito izpolzva v momenta
-        /// <param name="content"></param>teksta na file koito polzvame
-        /// <param name="path"></param>path ot koya papka e file
+        /// <param name="localPathPaths"></param> цсички пътища, които изпозлваме
+        /// <param name="filepath"></param>path на файла, който използваме в момента
+        /// <param name="content"></param>текста на файла, който използваме
+        /// <param name="path"></param>path от коя папка е файла
         public static void localScripPath(List<string> localPathPaths, string filepath, string[] content, string path)
         {
             string combineText = "";
@@ -225,26 +227,26 @@ namespace Ps1FilesLibrary
                     i++;
                 }
                 else
-                {              
+                {
                     string text = File.ReadAllText(line).Replace("$scriptPath  = (Get-Item $PSScriptRoot).FullName", null).Replace(". \"$scriptPath\\CommonVariables.ps1\"", null);
                     combineText += text;
                 }
             }
 
-            for (int j=0; j < content.Length; j++)
+            for (int j = 0; j < content.Length; j++)
             {
-                if (content[j].Contains(". \"$LocalScriptPath") && i==1)
+                if (content[j].Contains(". \"$LocalScriptPath") && i == 1)
                 {
                     content[j] = combineText;
                     i++;
                 }
-                else if(content[j].Contains(". \"$LocalScriptPath") && i != 1)
+                else if (content[j].Contains(". \"$LocalScriptPath") && i != 1)
                 {
                     content[j] = null;
                 }
             }
             string basePath = path + "\\CommonVariables.ps1";
-            for (int k = 0; k < content.Length; k++)// funkcia za script path
+            for (int k = 0; k < content.Length; k++)// фунцкия scriptpath
             {
                 if (content[k] != null)
                 {
@@ -255,20 +257,20 @@ namespace Ps1FilesLibrary
                 }
 
             }
-            string[] contentWithOutDuplicate = RemoveComments(content);
-            File.WriteAllLines(filepath, contentWithOutDuplicate);
+            File.WriteAllLines(filepath, content);
         }
-        public string[] array = { "\"$rootPath\\", "\"$parentPath\\", "\"$parent\\" ,"\"$scriptPath\\", "\"$ourPath\\", "\"$LocalScriptPath\\" };
+        public string[] array = { "\"$rootPath\\", "\"$parentPath\\", "\"$parent\\", "\"$scriptPath\\", "\"$ourPath\\", "\"$LocalScriptPath\\" };
 
         //ZA RESHENIE V SCHEDULEtASK, WEBSERVICE I WINDOWSERVICE SE MAHAT REDOVETE ZA ROOTHPATH
         // poneje te nasledyavat cherz scriptpath drug ifle koito sudurja roothpath kum sushtie elementi
+        // ako izpozlvame roothpath case vsichko shte raboti perfektno no ako go mahnem za da mmojem da chetem filovete po lesno(da nyamat mnogo "izlishni redove") togava se dublira mnogo roothpath
         public void successorRowSearcher(List<string> folderContent, string basePath)
         {
-            foreach (string path in folderContent)//path na vseki folder
+            foreach (string path in folderContent)//path на всяка папка
             {
-                for (int i = 0; i < array.Length; i++)//proveryava prez glavnite path funkcii vseki file koe sudurja 
+                for (int i = 0; i < array.Length; i++)//минава през фиксиран ред от кои редове да почне
                 {
-                    foreach (string filepath in Directory.GetFiles(path, "*.ps1"))// vsichki file-ve na vseki folder
+                    foreach (string filepath in Directory.GetFiles(path, "*.ps1"))// всчики файлове в папката
                     {
                         string fileContent = File.ReadAllText(filepath);
                         if (fileContent.Contains(array[i]) == true)
@@ -306,71 +308,62 @@ namespace Ps1FilesLibrary
                 }
             }
         }
-        // add new files for common virablees in every folder
-        public void commonVariables(List<string> foldercontent)
+        //добавя всички глобални променливи без дублиране в нова папка CommonVariables
+        public void commonVariablesGlobal(List<string> foldercontent)
         {
             foreach (string path in foldercontent)
             {
-                List<string> valuesOfVariables = new List<string>();// list koito zapazva vsichki promenlivi, shte izpolzvame lista da ppreglejdame v vseki file i da gi mahame neshtata koit osa v nego
-                Dictionary<string, int> keyValuePairs = new Dictionary<string, int>();// key= promenlivata koyato sme namerili value= kolko purti se poftarya
-                int i = 0;//sledi kolko file ps1 sa v papkata
-                foreach (string filepath in Directory.GetFiles(path, "*.ps1"))// vsichki file-ve na vseki folder
+                List<string> valuesOfVariables = new List<string>();// лист, който ще запазва всички променливи
+                int i = 0;//брояч за броя файлове в папката
+                foreach (string filepath in Directory.GetFiles(path, "*.ps1"))// всчики файлове в папката
                 {
                     i++;
-                    string[] content=File.ReadAllLines(filepath);
-                    foreach(string line in content)
+                    string[] content = File.ReadAllLines(filepath);
+                    foreach (string line in content)
                     {
-                        if (line.Contains("$Global:") == true)//proveryava za global promenlivi
+                        if (line.Contains("$Global:") == true)//проверява за глобални променливи
                         {
-                            try//opitva da dobavi promenlivata i ako veche ya ima uvelichava value s 1( ako nakraya value =i tova oznachava che go iam v vseki file i shte se dobavi v novia file)
+                            if (valuesOfVariables.Contains(line) == false)
                             {
-                                keyValuePairs.Add(line, 1);
-                            }
-                            catch
-                            {
-                                keyValuePairs[line]++;
+                                valuesOfVariables.Add(line);
                             }
                         }
                     }
                 }
-                if (i > 1)//ako ima poveche ot 1 file samo togava da suzdade variables 
+                if (i > 1)//ако е повече от 1 файл тогава да създаде нов файл
                 {
                     using (StreamWriter sw = new StreamWriter(path + "\\Variables.ps1"))
                     {
-                        foreach (var item in keyValuePairs)
+                        foreach (string item in valuesOfVariables)
                         {
-                            if (item.Value == i)
-                            {
-                                sw.WriteLine(item.Key);
-                                valuesOfVariables.Add(item.Key);
-                            }
+                            sw.WriteLine(item);
                         }
-                    }
-                }
-                //adding extend row for  every file for variables.ps1
-                foreach (string filepath in Directory.GetFiles(path, "*.ps1"))// vsichki file-ve na vseki folder
-                {
-                    if (filepath!= path + "\\Variables.ps1") {
-                        string[] conten = File.ReadAllLines(filepath);
-                        foreach (string item in valuesOfVariables)// vsichki promenlivi koito tryabva da se mahnat
-                        {
-                            conten = conten.Where(s => s != item).ToArray();
-                        }
+                    } //добавяне на ред за наследяване variables.ps1
 
-                        File.WriteAllLines(filepath, conten);
-                    }
-                }
-                foreach (string filepath in Directory.GetFiles(path, "*.ps1"))// vsichki file-ve na vseki folder
-                {
-                    if (filepath != path + "\\Variables.ps1")
+                    foreach (string filepath in Directory.GetFiles(path, "*.ps1"))// всчики файлове в папката
                     {
-                        string conten = File.ReadAllText(filepath);
-                        conten = "$scriptPath  = (Get-Item $PSScriptRoot).FullName \r\n" + ". \"$scriptPath\\Variables.ps1\"\" \r\n" + conten;
+                        if (filepath != path + "\\Variables.ps1")
+                        {
+                            string[] conten = File.ReadAllLines(filepath);
+                            foreach (string item in valuesOfVariables)// всички променливи, които трябва да се махнат
+                            {
+                                conten = conten.Where(s => s != item).ToArray();
+                            }
 
-                        File.WriteAllText(filepath, conten);
+                            File.WriteAllLines(filepath, conten);
+                        }
+                    }
+                    foreach (string filepath in Directory.GetFiles(path, "*.ps1"))// всчики файлове в папката
+                    {
+                        if (filepath != path + "\\Variables.ps1")
+                        {
+                            string conten = File.ReadAllText(filepath);
+                            conten = "$scriptPath  = (Get-Item $PSScriptRoot).FullName \r\n" + ". \"$scriptPath\\Variables.ps1\"\" \r\n" + conten;
+                            File.WriteAllText(filepath, conten);
+                        }
                     }
                 }
-            }  
+            }
         }
     }
 }
