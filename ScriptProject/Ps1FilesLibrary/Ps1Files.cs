@@ -333,7 +333,7 @@ namespace Ps1FilesLibrary
                         }
                     }
                 }
-                if (i > 1)//ako ima poveche ot 1 file samo togava da suzdade variables 
+                if (i > 1 && valuesOfVariables.Count>0)//ako ima poveche ot 1 file samo togava da suzdade variables 
                 {
                     using (StreamWriter sw = new StreamWriter(path + "\\Variables.ps1"))
                     {
@@ -346,30 +346,32 @@ namespace Ps1FilesLibrary
                             }
                         }
                     }
-                }
-                //adding extend row for  every file for variables.ps1
-                foreach (string filepath in Directory.GetFiles(path, "*.ps1"))// vsichki file-ve na vseki folder
-                {
-                    if (filepath!= path + "\\Variables.ps1") {
-                        string[] conten = File.ReadAllLines(filepath);
-                        foreach (string item in valuesOfVariables)// vsichki promenlivi koito tryabva da se mahnat
-                        {
-                            conten = conten.Where(s => s != item).ToArray();
-                        }
-
-                        File.WriteAllLines(filepath, conten);
-                    }
-                }
-                foreach (string filepath in Directory.GetFiles(path, "*.ps1"))// vsichki file-ve na vseki folder
-                {
-                    if (filepath != path + "\\Variables.ps1")
+                    //adding extend row for  every file for variables.ps1
+                    foreach (string filepath in Directory.GetFiles(path, "*.ps1"))// vsichki file-ve na vseki folder
                     {
-                        string conten = File.ReadAllText(filepath);
-                        conten = "$scriptPath  = (Get-Item $PSScriptRoot).FullName \r\n" + ". \"$scriptPath\\Variables.ps1\"\" \r\n" + conten;
+                        if (filepath != path + "\\Variables.ps1")
+                        {
+                            string[] conten = File.ReadAllLines(filepath);
+                            foreach (string item in valuesOfVariables)// vsichki promenlivi koito tryabva da se mahnat
+                            {
+                                conten = conten.Where(s => s != item).ToArray();
+                            }
 
-                        File.WriteAllText(filepath, conten);
+                            File.WriteAllLines(filepath, conten);
+                        }
+                    }
+                    foreach (string filepath in Directory.GetFiles(path, "*.ps1"))// vsichki file-ve na vseki folder
+                    {
+                        if (filepath != path + "\\Variables.ps1")
+                        {
+                            string conten = File.ReadAllText(filepath);
+                            conten = "$scriptPath  = (Get-Item $PSScriptRoot).FullName \r\n" + ". \"$scriptPath\\Variables.ps1\"\" \r\n" + conten;
+
+                            File.WriteAllText(filepath, conten);
+                        }
                     }
                 }
+             
             }  
         }
     }
