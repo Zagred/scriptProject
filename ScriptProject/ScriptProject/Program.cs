@@ -11,7 +11,7 @@ namespace ScriptProject
 {
     internal class Program
     {
-        //method to add all paths in single folder
+        //метод за добавяне на всиччки пътища от една папка
         private static List<string> Init_List(string folder)
         {
             List<string> folderContent = new List<string>();
@@ -19,12 +19,11 @@ namespace ScriptProject
             folderContent.Add(folder);
             foreach (var directory in Directory.GetDirectories(folder))
             {
-                //folderContent.Add(directory);
                 folderContent.AddRange(Init_List(directory));;
             }
             return folderContent;
         }
-        //method to find  all folders
+        //метод за намиране на всички папки
         private static List<string> Init_Dict(string folder)
         {
              List<string> folderContent = new  List<string> ();
@@ -38,7 +37,7 @@ namespace ScriptProject
         }
         static void Main(string[] args)
         {
-            //global path MUST BE CHANGE FOR OTHER DEVICES
+            //global path ,който се променя при ползване на друг компчтър
             string basePath = @"C:\Users\paco\Desktop\scripts\";
 
             List<string> folderContent = Init_Dict(basePath);

@@ -29,7 +29,7 @@ namespace Ps1FilesLibrary
                 foreach (string filepath in Directory.GetFiles(path, "*.ps1"))// всчики файлове в папката
                 {
                     string[] fileContent = File.ReadAllLines(filepath);
-                    fileContent = fileContent.Where(arg => !string.IsNullOrWhiteSpace(arg)).ToArray();//маха всеки ред който не съдържа нищп
+                    fileContent = fileContent.Where(arg => !string.IsNullOrWhiteSpace(arg)).ToArray();//маха всеки ред който не съдържа нищо
                     File.WriteAllLines(filepath, fileContent);
                 }
             }
@@ -261,9 +261,8 @@ namespace Ps1FilesLibrary
         }
         public string[] array = { "\"$rootPath\\", "\"$parentPath\\", "\"$parent\\", "\"$scriptPath\\", "\"$ourPath\\", "\"$LocalScriptPath\\" };
 
-        //ZA RESHENIE V SCHEDULEtASK, WEBSERVICE I WINDOWSERVICE SE MAHAT REDOVETE ZA ROOTHPATH
-        // poneje te nasledyavat cherz scriptpath drug ifle koito sudurja roothpath kum sushtie elementi
-        // ako izpozlvame roothpath case vsichko shte raboti perfektno no ako go mahnem za da mmojem da chetem filovete po lesno(da nyamat mnogo "izlishni redove") togava se dublira mnogo roothpath
+        //махат се редовете за roothPath SCHEDULEtASK, WEBSERVICE и WINDOWSERVICE 
+        //понеже те наследяват чрез scriptpath друг file който съдържа roothpath кум същите елементи
         public void successorRowSearcher(List<string> folderContent, string basePath)
         {
             foreach (string path in folderContent)//path на всяка папка
