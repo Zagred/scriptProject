@@ -48,6 +48,7 @@ namespace ScriptProject
             var ps1 = new Ps1Files();
             ps1.successorRowSearcher(folderContent,basePath);
             ps1.commonVariables(folderContent);
+            ps1.RemoveEmptyRows(folderContent);
         }
     }
 }
