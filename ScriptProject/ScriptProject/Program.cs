@@ -11,9 +11,6 @@ namespace ScriptProject
 {
     internal class Program
     {
-
-        //methods to add all paths in folders
-
         //method to add all paths in single folder
         private static List<string> Init_List(string folder)
         {
@@ -47,7 +44,8 @@ namespace ScriptProject
             List<string> folderContent = Init_Dict(basePath);
             var ps1 = new Ps1Files();
             ps1.successorRowSearcher(folderContent,basePath);
-            ps1.commonVariables(folderContent);
+            ps1.commonVariablesGlobal(folderContent);
+            ps1.RemoveEmptyRows(folderContent);
         }
     }
 }

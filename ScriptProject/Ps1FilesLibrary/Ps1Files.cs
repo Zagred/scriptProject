@@ -321,7 +321,7 @@ namespace Ps1FilesLibrary
                     string[] content = File.ReadAllLines(filepath);
                     foreach (string line in content)
                     {
-                        if (line.Contains("$Global:") == true)//проверява за глобални променливи
+                        if (line.Contains("$Global:") == true && (line[0]=='$'|| line[0]=='#' && line[1]=='$'))//проверява за глобални променливи
                         {
                             if (valuesOfVariables.Contains(line) == false)
                             {
