@@ -261,9 +261,8 @@ namespace Ps1FilesLibrary
         }
         public string[] array = { "\"$rootPath\\", "\"$parentPath\\", "\"$parent\\", "\"$scriptPath\\", "\"$ourPath\\", "\"$LocalScriptPath\\" };
 
-        //ZA RESHENIE V SCHEDULEtASK, WEBSERVICE I WINDOWSERVICE SE MAHAT REDOVETE ZA ROOTHPATH
-        // poneje te nasledyavat cherz scriptpath drug ifle koito sudurja roothpath kum sushtie elementi
-        // ako izpozlvame roothpath case vsichko shte raboti perfektno no ako go mahnem za da mmojem da chetem filovete po lesno(da nyamat mnogo "izlishni redove") togava se dublira mnogo roothpath
+        //махат се редовете за roothPath SCHEDULEtASK, WEBSERVICE и WINDOWSERVICE 
+        //понеже те наследяват чрез scriptpath друг file който съдържа roothpath кум същите елементи
         public void successorRowSearcher(List<string> folderContent, string basePath)
         {
             foreach (string path in folderContent)//path на всяка папка
@@ -308,23 +307,23 @@ namespace Ps1FilesLibrary
                 }
             }
         }
-        // add new files for common virablees in every folder
+        //добавя всички глобални променливи с дублиране в нова папка CommonVariables
         public void commonVariables(List<string> foldercontent)
         {
             foreach (string path in foldercontent)
             {
-                List<string> valuesOfVariables = new List<string>();// list koito zapazva vsichki promenlivi, shte izpolzvame lista da ppreglejdame v vseki file i da gi mahame neshtata koit osa v nego
-                Dictionary<string, int> keyValuePairs = new Dictionary<string, int>();// key= promenlivata koyato sme namerili value= kolko purti se poftarya
-                int i = 0;//sledi kolko file ps1 sa v papkata
-                foreach (string filepath in Directory.GetFiles(path, "*.ps1"))// vsichki file-ve na vseki folder
+                List<string> valuesOfVariables = new List<string>();// лист, който ще запазва всички променливи
+                Dictionary<string, int> keyValuePairs = new Dictionary<string, int>();// key= променлива, кощто сме намерили value= колко пъти се пофтаря
+                int i = 0;//брояч за броя файлове в папкат
+                foreach (string filepath in Directory.GetFiles(path, "*.ps1"))// всчики файлове в папката
                 {
                     i++;
                     string[] content=File.ReadAllLines(filepath);
                     foreach(string line in content)
                     {
-                        if (line.Contains("$Global:") == true)//proveryava za global promenlivi
+                        if (line.Contains("$Global:") == true)//проверява за глобални променливи
                         {
-                            try//opitva da dobavi promenlivata i ako veche ya ima uvelichava value s 1( ako nakraya value =i tova oznachava che go iam v vseki file i shte se dobavi v novia file)
+                            try//опитва да добави променливата ако я има просто добавя към value +1
                             {
                                 keyValuePairs.Add(line, 1);
                             }
@@ -335,7 +334,7 @@ namespace Ps1FilesLibrary
                         }
                     }
                 }
-                if (i > 1 && valuesOfVariables.Count>0)//ako ima poveche ot 1 file samo togava da suzdade variables 
+                if (i > 1 && valuesOfVariables.Count>0)//ако е повече от 1 файл тогава да създаде нов файл
                 {
                     using (StreamWriter sw = new StreamWriter(path + "\\Variables.ps1"))
                     {
@@ -348,13 +347,13 @@ namespace Ps1FilesLibrary
                             }
                         }
                     }
-                    //adding extend row for  every file for variables.ps1
-                    foreach (string filepath in Directory.GetFiles(path, "*.ps1"))// vsichki file-ve na vseki folder
+                    //добавяне на ред за наследяване variables.ps1
+                    foreach (string filepath in Directory.GetFiles(path, "*.ps1"))// всчики файлове в папката
                     {
                         if (filepath != path + "\\Variables.ps1")
                         {
                             string[] conten = File.ReadAllLines(filepath);
-                            foreach (string item in valuesOfVariables)// vsichki promenlivi koito tryabva da se mahnat
+                            foreach (string item in valuesOfVariables)// всички променливи, които трябва да се махнат
                             {
                                 conten = conten.Where(s => s != item).ToArray();
                             }
@@ -362,7 +361,7 @@ namespace Ps1FilesLibrary
                             File.WriteAllLines(filepath, conten);
                         }
                     }
-                    foreach (string filepath in Directory.GetFiles(path, "*.ps1"))// vsichki file-ve na vseki folder
+                    foreach (string filepath in Directory.GetFiles(path, "*.ps1"))// всчики файлове в папката
                     {
                         if (filepath != path + "\\Variables.ps1")
                         {
