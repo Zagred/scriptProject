@@ -296,10 +296,10 @@ namespace Ps1FilesLibrary
                                     fileContent = fileContent.Replace("$parent =  (Get-Item $PSScriptRoot).Parent.FullName", null);
                                     parent(filepath, fileContent, path);
                                     break;
-                                    //case "\"$rootPath\\"://raboti no slaga tolkova mnogo tekst che filovete ne se chetat
-                                    //    fileContent = fileContent.Replace("$rootPath  = (Get-Item $PSScriptRoot).Parent.FullName", null);
-                                    //    rootPath(filepath, fileContent, basePath);
-                                    //    break;
+                                case "\"$rootPath\\"://raboti no slaga tolkova mnogo tekst che filovete ne se chetat
+                                    fileContent = fileContent.Replace("$rootPath  = (Get-Item $PSScriptRoot).Parent.FullName", null);
+                                    rootPath(filepath, fileContent, basePath);
+                                    break;
                             }
                         }
 
