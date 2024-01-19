@@ -10,18 +10,6 @@ namespace Ps1FilesLibrary
 {
     public class Ps1Files
     {
-        public static string Trim(string str, char trimChar)
-        {
-            string result = string.Empty;
-            for (int i = 0; i < str.Length; i++)
-            {
-                if (str[i] != trimChar)
-                {
-                    result += str[i];
-                }
-            }
-            return result;
-        }
         public void RemoveEmptyRows(List<string> folderContent)
         {
             foreach (string path in folderContent)//path на всяка папка
@@ -40,19 +28,6 @@ namespace Ps1FilesLibrary
         /// <param name="filepath"></param> path на файл, който използваме в момента
         /// <param name="fileContent"></param> текста на файла, който използваме
         /// <param name="path"></param> path от коя папка е файла
-        public static void ourPath(string filepath, string fileContent, string path)
-        {
-            string[] content = fileContent.Split('\r', '\n');
-            for (int i = 0; i < content.Length; i++)
-            {
-                if (content[i].Contains(". \"$ourPath"))
-                {
-                    content[i] = path + Trim(content[i].Substring(11), '\"');
-                    content[i] = File.ReadAllText(content[i]);
-                }
-            }
-            File.WriteAllLines(filepath, content);
-        }
         public static void scriptPath(string filepath, string fileContent, string path)
         {
             string[] content = fileContent.Split('\r', '\n');
@@ -60,7 +35,7 @@ namespace Ps1FilesLibrary
             {
                 if (content[i].Contains(". \"$scriptPath"))
                 {
-                    content[i] = path + Trim(content[i].Substring(content[i].IndexOf('\\')), '\"');
+                    content[i] = path + content[i].Substring(content[i].IndexOf('\\')).Trim('\"');
                     content[i] = File.ReadAllText(content[i]);
                 }
             }
@@ -74,36 +49,15 @@ namespace Ps1FilesLibrary
         /// <param name="path"></param> path на папката на файла
         public static void parentPath(string filepath, string fileContent, string path)
         {
+            int ParentConst = 14;
             path = path.Substring(0, path.LastIndexOf('\\'));
             string[] content = fileContent.Split('\r', '\n');
             for (int i = 0; i < content.Length; i++)
             {
                 if (content[i].Contains(". \"$parentPath"))
                 {
-                    content[i] = path + Trim(content[i].Substring(14), '\"');
+                    content[i] = path + content[i].Substring(ParentConst).Trim('\"');
                     try// слагаме try catch фунцкия, защото в един от файловете се иска файл, който не съществува
-                    {
-                        content[i] = File.ReadAllText(content[i]);
-                        File.WriteAllLines(filepath, content);
-                    }
-                    catch
-                    {
-                        Console.WriteLine($"The following file those not exist: {content[i]} ");
-                    }
-                }
-            }
-
-        }
-        public static void parent(string filepath, string fileContent, string path)
-        {
-            path = path.Substring(0, path.LastIndexOf('\\'));
-            string[] content = fileContent.Split('\r', '\n');
-            for (int i = 0; i < content.Length; i++)
-            {
-                if (content[i].Contains(". \"$parent"))
-                {
-                    content[i] = path + Trim(content[i].Substring(10), '\"');
-                    try
                     {
                         content[i] = File.ReadAllText(content[i]);
                         File.WriteAllLines(filepath, content);
@@ -130,7 +84,7 @@ namespace Ps1FilesLibrary
             {
                 if (content[i].Contains(". \"$rootPath"))
                 {
-                    string path = basePath + Trim(content[i].Replace(". \"$rootPath\\", null), '\"');// да намери от коя папка  roothpath
+                    string path = basePath + content[i].Replace(". \"$rootPath\\", null).Trim('\"');// да намери от коя папка  roothpath
                     roothPathPaths.Add(path);
                 }
             }
@@ -187,79 +141,7 @@ namespace Ps1FilesLibrary
             }
             File.WriteAllLines(filepath, content);
         }
-        /// <summary>
-        /// разлиаката му с другите методи е следната: има същатата функция като scriptPath, но има порблема на roothPath(повтаря се и редове се дублират)
-        /// </summary>
-        /// <param name="filepath"></param> path на файла, който използваме в момента
-        /// <param name="fileContent"></param> текста на файла, който използваме
-        /// <param name="path"></param> path от коя папка е файла
-        public static void LocalScript(string filepath, string fileContent, string path)
-        {
-            string[] content = fileContent.Split('\r', '\n');
-            List<string> localPathPaths = new List<string>();//всички файлове, които иамт  localscriptpath
-            for (int i = 0; i < content.Length; i++)
-            {
-                if (content[i].Contains(". \"$LocalScriptPath"))
-                {
-                    string basePath = path + Trim(content[i].Substring(content[i].IndexOf('\\')), '\"');
-                    localPathPaths.Add(basePath);
-                }
-            }
-            localScripPath(localPathPaths, filepath, content, path);
-        }
-        /// <summary>
-        /// преглежда всичките файлове с scriptpath от папкта и премахва scriptpath редовете и земста всеки uniqe scriptpath с текста, който трябва
-        /// </summary>
-        /// <param name="localPathPaths"></param> цсички пътища, които изпозлваме
-        /// <param name="filepath"></param>path на файла, който използваме в момента
-        /// <param name="content"></param>текста на файла, който използваме
-        /// <param name="path"></param>path от коя папка е файла
-        public static void localScripPath(List<string> localPathPaths, string filepath, string[] content, string path)
-        {
-            string combineText = "";
-            int i = 0;
-
-            foreach (string line in localPathPaths)
-            {
-                if (i == 0)
-                {
-                    combineText += File.ReadAllText(line).Replace("$scriptPath  = (Get-Item $PSScriptRoot).FullName", null);
-                    i++;
-                }
-                else
-                {
-                    string text = File.ReadAllText(line).Replace("$scriptPath  = (Get-Item $PSScriptRoot).FullName", null).Replace(". \"$scriptPath\\CommonVariables.ps1\"", null);
-                    combineText += text;
-                }
-            }
-
-            for (int j = 0; j < content.Length; j++)
-            {
-                if (content[j].Contains(". \"$LocalScriptPath") && i == 1)
-                {
-                    content[j] = combineText;
-                    i++;
-                }
-                else if (content[j].Contains(". \"$LocalScriptPath") && i != 1)
-                {
-                    content[j] = null;
-                }
-            }
-            string basePath = path + "\\CommonVariables.ps1";
-            for (int k = 0; k < content.Length; k++)// фунцкия scriptpath
-            {
-                if (content[k] != null)
-                {
-                    if (content[k].Contains(". \"$scriptPath"))
-                    {
-                        content[k] = content[k].Replace(". \"$scriptPath\\CommonVariables.ps1\"", File.ReadAllText(basePath));
-                    }
-                }
-
-            }
-            File.WriteAllLines(filepath, content);
-        }
-        public string[] array = { "\"$rootPath\\", "\"$parentPath\\", "\"$parent\\", "\"$scriptPath\\", "\"$ourPath\\", "\"$LocalScriptPath\\" };
+        public string[] array = { "\"$rootPath\\", "\"$parentPath\\", "\"$scriptPath\\" };
 
         //махат се редовете за roothPath SCHEDULEtASK, WEBSERVICE и WINDOWSERVICE 
         //понеже те наследяват чрез scriptpath друг file който съдържа roothpath кум същите елементи
@@ -284,18 +166,6 @@ namespace Ps1FilesLibrary
                                     fileContent = fileContent.Replace("$scriptPath  = (Get-Item $PSScriptRoot).FullName", null);
                                     scriptPath(filepath, fileContent, path);
                                     break;
-                                case "\"$ourPath\\":
-                                    fileContent = fileContent.Replace("$ourPath =  (Get-Item $PSScriptRoot).FullName", null);
-                                    ourPath(filepath, fileContent, path);
-                                    break;
-                                case "\"$LocalScriptPath\\":
-                                    fileContent = fileContent.Replace("$LocalScriptPath  = (Get-Item $PSScriptRoot).FullName", null);
-                                    LocalScript(filepath, fileContent, path);
-                                    break;
-                                case "\"$parent\\":
-                                    fileContent = fileContent.Replace("$parent =  (Get-Item $PSScriptRoot).Parent.FullName", null);
-                                    parent(filepath, fileContent, path);
-                                    break;
                                 case "\"$rootPath\\"://raboti no slaga tolkova mnogo tekst che filovete ne se chetat
                                     fileContent = fileContent.Replace("$rootPath  = (Get-Item $PSScriptRoot).Parent.FullName", null);
                                     rootPath(filepath, fileContent, basePath);
@@ -313,6 +183,7 @@ namespace Ps1FilesLibrary
             foreach (string path in foldercontent)
             {
                 List<string> valuesOfVariables = new List<string>();// лист, който ще запазва всички променливи
+                Dictionary<string,int> matches= new Dictionary<string,int>();
                 int i = 0;//брояч за броя файлове в папката
                 foreach (string filepath in Directory.GetFiles(path, "*.ps1"))// всчики файлове в папката
                 {
@@ -322,14 +193,25 @@ namespace Ps1FilesLibrary
                     {
                         if (line.Contains("$Global:") == true && (line[0]=='$'|| line[0]=='#' && line[1]=='$'))//проверява за глобални променливи
                         {
-                            if (valuesOfVariables.Contains(line) == false)
+                            try
                             {
-                                valuesOfVariables.Add(line);
+                                matches.Add(line, 1);
+                            }
+                            catch
+                            {
+                                matches[line]++;
                             }
                         }
                     }
                 }
-                if (i > 1)//ако е повече от 1 файл тогава да създаде нов файл
+                foreach(var item in matches)
+                {
+                    if (item.Value == i)
+                    {
+                        valuesOfVariables.Add(item.Key);
+                    }
+                }
+                if (i > 1 && valuesOfVariables.Count>0)//ако е повече от 1 файл тогава да създаде нов файл
                 {
                     using (StreamWriter sw = new StreamWriter(path + "\\Variables.ps1"))
                     {
