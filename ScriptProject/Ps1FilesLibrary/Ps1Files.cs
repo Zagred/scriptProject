@@ -35,8 +35,15 @@ namespace Ps1FilesLibrary
             {
                 if (content[i].Contains(". \"$scriptPath"))
                 {
-                    content[i] = path + content[i].Substring(content[i].IndexOf('\\')).Trim('\"');
-                    content[i] = File.ReadAllText(content[i]);
+                    try
+                    {
+                        content[i] = path + content[i].Substring(content[i].IndexOf('\\')).Trim('\"');
+                        content[i] = File.ReadAllText(content[i]);
+                    }
+                    catch
+                    {
+                        Console.WriteLine("This means files is from roothpath folder");
+                    }
                 }
             }
             File.WriteAllLines(filepath, content);
@@ -79,67 +86,16 @@ namespace Ps1FilesLibrary
         public static void rootPath(string filepath, string fileContent, string basePath)
         {
             string[] content = fileContent.Split('\r', '\n');
-            List<string> roothPathPaths = new List<string>();
             for (int i = 0; i < content.Length; i++)
             {
-                if (content[i].Contains(". \"$rootPath"))
-                {
+                if (content[i].Contains(". \"$rootPath") && content[i].Contains("CommonVariables")){
                     string path = basePath + content[i].Replace(". \"$rootPath\\", null).Trim('\"');// да намери от коя папка  roothpath
-                    roothPathPaths.Add(path);
-                }
-            }
-            roothScriptPath(roothPathPaths, filepath, content, basePath);
-        }
-        /// <summary>
-        /// замества roothPath(те винаги са от 1-3) и понеже всички имат scriptPath към Login програмата ще наследи само първият а на другите ще махне реда
-        /// </summary>
-        /// <param name="roothPathPaths"></param> лист на всички roothPath, които се използват
-        /// <param name="filepath"></param>path на файл, който използваме в момента
-        /// <param name="content"></param> текста, който ще добавим
-        /// <param name="basePath"></param> това е главния path трябва ни специфично за roothPath, защото ще използваме изцяло друга папка
-        public static void roothScriptPath(List<string> roothPathPaths, string filepath, string[] content, string basePath)
-        {
-            string combineText = "";//ще заменяме определна част от стринга и ще стане по бързо да се прави със стринг околкото с масив
-            int i = 0;
-            foreach (string path in roothPathPaths)
-            {
-                if (i == 0)//първи roothpath при него махаме само loggin реда 
-                {
-                    combineText = File.ReadAllText(path).Replace("$scriptPath  = (Get-Item $PSScriptRoot).FullName", null);
-                    i++;
-                }
-                else// всеки друг се махат и двата реда
-                {
-                    string text = File.ReadAllText(path).Replace("$scriptPath  = (Get-Item $PSScriptRoot).FullName", null).Replace(". \"$scriptPath\\Logging.ps1\"", null);
-                    combineText += text;
-                }
-            }
+                    content[i]=File.ReadAllText(path);
+                    File.WriteAllLines(filepath, content);
 
-            for (int j = 0; j < content.Length; j++)// от content маха всички roothpatov освен 1 който съдържа  scriptpath
-            {
-                if (content[j].Contains(". \"$rootPath") && i == 1)
-                {
-                    content[j] = combineText;
-                    i++;
-                }
-                else if (content[j].Contains(". \"$rootPath") && i != 1)
-                {
-                    content[j] = null;
                 }
             }
-            basePath = basePath + "common\\Logging.ps1";
-            for (int k = 0; k < content.Length; k++)// функция за scriptpath
-            {
-                if (content[k] != null)
-                {
-                    if (content[k].Contains(". \"$scriptPath"))
-                    {
-                        content[k] = content[k].Replace(". \"$scriptPath\\Logging.ps1\"", File.ReadAllText(basePath));
-                    }
-                }
-
-            }
-            File.WriteAllLines(filepath, content);
+            
         }
         public string[] array = { "\"$rootPath\\", "\"$parentPath\\", "\"$scriptPath\\" };
 
