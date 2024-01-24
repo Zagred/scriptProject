@@ -35,14 +35,14 @@ namespace Ps1FilesLibrary
             {
                 if (content[i].Contains(". \"$scriptPath"))
                 {
-                    try
+                    try//зарадо roothapth ще има много scriptpath-вове които няма да ги има в папката(Loggin.ps1) и ще ги махнем, защото нямаме нужда от тях
                     {
                         content[i] = path + content[i].Substring(content[i].IndexOf('\\')).Trim('\"');
                         content[i] = File.ReadAllText(content[i]);
                     }
                     catch
                     {
-                        Console.WriteLine("This means files is from roothpath folder");
+                        content[i] = null;
                     }
                 }
             }
@@ -64,14 +64,14 @@ namespace Ps1FilesLibrary
                 if (content[i].Contains(". \"$parentPath"))
                 {
                     content[i] = path + content[i].Substring(ParentConst).Trim('\"');
-                    try// слагаме try catch фунцкия, защото в един от файловете се иска файл, който не съществува
+                    try// слагаме try catch фунцкия, защото в един от файловете се иска файл, който не съществува и просто го занъляваме сякаш го е нямало
                     {
                         content[i] = File.ReadAllText(content[i]);
                         File.WriteAllLines(filepath, content);
                     }
                     catch
                     {
-                        Console.WriteLine($"The following file those not exist: {content[i]} ");
+                        content[i] = null;
                     }
                 }
             }
@@ -122,7 +122,7 @@ namespace Ps1FilesLibrary
                                     fileContent = fileContent.Replace("$scriptPath  = (Get-Item $PSScriptRoot).FullName", null);
                                     scriptPath(filepath, fileContent, path);
                                     break;
-                                case "\"$rootPath\\"://raboti no slaga tolkova mnogo tekst che filovete ne se chetat
+                                case "\"$rootPath\\":
                                     fileContent = fileContent.Replace("$rootPath  = (Get-Item $PSScriptRoot).Parent.FullName", null);
                                     rootPath(filepath, fileContent, basePath);
                                     break;
