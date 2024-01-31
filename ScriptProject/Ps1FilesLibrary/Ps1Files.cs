@@ -149,11 +149,13 @@ namespace Ps1FilesLibrary
                     {
                         if (line.Contains("$Global:") == true && (line[0]=='$'|| line[0]=='#' && line[1]=='$'))//проверява за глобални променливи
                         {
-                            try
+
+                            if (!matches.ContainsKey(line))
                             {
+
                                 matches.Add(line, 1);
                             }
-                            catch
+                            else
                             {
                                 matches[line]++;
                             }

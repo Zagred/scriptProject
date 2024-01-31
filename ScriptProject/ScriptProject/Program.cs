@@ -26,13 +26,13 @@ namespace ScriptProject
         static void Main(string[] args)
         {
             //global path ,който се променя при ползване на друг компчтър
-            string basePath = @"C:\Users\paco\Desktop\scripts\";
+            string basePath = @"C:\Users\plamen\Desktop\scripts\scripts\";
 
             List<string> folderContent = Init_Dict(basePath);
             var ps1 = new Ps1Files();
             ps1.successorRowSearcher(folderContent, basePath);
             ps1.commonVariablesGlobal(folderContent);
-            ps1.RemoveEmptyRows(folderContent);
+           // ps1.RemoveEmptyRows(folderContent);
         }
     }
 }
